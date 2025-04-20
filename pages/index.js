@@ -1,9 +1,9 @@
 import Head from 'next/head'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase' // correct import
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Card, CardContent } from "../components/ui/card"
+import { Button } from "../components/ui/button"
+import { Input } from "../components/ui/input"
 import { Sparkles, Search } from "lucide-react"
 import { motion } from "framer-motion"
 
