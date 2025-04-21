@@ -25,9 +25,11 @@ export default function Login() {
     }
   }, [])
 
-  // ✅ Just a one-time session check in case user already logged in
+  // ✅ Delay before checking session to avoid loop
   useEffect(() => {
     const checkSession = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 800)) // 👈 delay added
+
       const {
         data: { session },
       } = await supabase.auth.getSession()
@@ -44,7 +46,7 @@ export default function Login() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/login', // after login, user comes back here
+        redirectTo: 'https://www.drn.today/login',
       },
     })
   }
