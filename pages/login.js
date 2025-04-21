@@ -10,14 +10,14 @@ export default function Login() {
   const [phone, setPhone] = useState('')
   const router = useRouter()
 
-  // ✅ Auto-redirect to dashboard if session exists
+  // ✅ Auto-redirect to dashboard if session exists (with debug log)
   useEffect(() => {
     const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      const { data, error } = await supabase.auth.getSession()
 
-      if (session) {
+      console.log('🔥 SESSION DEBUG:', data, error)
+
+      if (data?.session) {
         router.push('/dashboard')
       }
     }
@@ -29,7 +29,7 @@ export default function Login() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/login', // or use /login if redirect handled here
+        redirectTo: 'https://www.drn.today/login', // Must match your Google OAuth config
       },
     })
   }
