@@ -16,14 +16,14 @@ export default function Login() {
     if (!email) return alert('Please enter an email')
     const { error } = await supabase.auth.signInWithOtp({ email })
     if (error) alert(error.message)
-    else alert('Magic link sent!')
+    else alert('Magic link sent to email!')
   }
 
   const handlePhoneLogin = async () => {
     if (!phone) return alert('Please enter a phone number')
     const { error } = await supabase.auth.signInWithOtp({ phone })
     if (error) alert(error.message)
-    else alert('OTP sent!')
+    else alert('OTP sent to phone!')
   }
 
   return (
@@ -38,31 +38,28 @@ export default function Login() {
       </motion.h1>
 
       <motion.div
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm space-y-4"
       >
-        {/* Google Login */}
-        <Button onClick={handleGoogleLogin} className="w-full text-white bg-blue-600 hover:bg-blue-700">
+        <Button onClick={handleGoogleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
           Login with Google
         </Button>
 
-        {/* Email Magic Link */}
         <div className="space-y-2">
           <Input
             type="email"
-            placeholder="Enter your email"
+            placeholder="Email for magic link"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
           <Button onClick={handleEmailLogin} className="w-full">Send Magic Link</Button>
         </div>
 
-        {/* Phone OTP */}
         <div className="space-y-2">
           <Input
             type="tel"
-            placeholder="Enter your phone"
+            placeholder="Phone for OTP"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
