@@ -29,7 +29,7 @@ export default function Login() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/dashboard', // or use /login if redirect handled here
+        redirectTo: 'https://www.drn.today/login', // or use /login if redirect handled here
       },
     })
   }
