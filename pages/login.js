@@ -9,7 +9,12 @@ export default function Login() {
   const [phone, setPhone] = useState('')
 
   const handleGoogleLogin = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' })
+    await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: 'https://www.drn.today/dashboard', // ✅ REDIRECT TO DASHBOARD AFTER LOGIN
+      },
+    })
   }
 
   const handleEmailLogin = async () => {
@@ -42,10 +47,15 @@ export default function Login() {
         whileTap={{ scale: 0.98 }}
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm space-y-4"
       >
-        <Button onClick={handleGoogleLogin} className="w-full bg-blue-600 hover:bg-blue-700 text-white">
+        {/* ✅ Google Login */}
+        <Button
+          onClick={handleGoogleLogin}
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+        >
           Login with Google
         </Button>
 
+        {/* ✅ Email Magic Link */}
         <div className="space-y-2">
           <Input
             type="email"
@@ -53,9 +63,12 @@ export default function Login() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <Button onClick={handleEmailLogin} className="w-full">Send Magic Link</Button>
+          <Button onClick={handleEmailLogin} className="w-full">
+            Send Magic Link
+          </Button>
         </div>
 
+        {/* ✅ Phone OTP */}
         <div className="space-y-2">
           <Input
             type="tel"
@@ -63,7 +76,9 @@ export default function Login() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
-          <Button onClick={handlePhoneLogin} className="w-full">Send OTP</Button>
+          <Button onClick={handlePhoneLogin} className="w-full">
+            Send OTP
+          </Button>
         </div>
       </motion.div>
     </div>
