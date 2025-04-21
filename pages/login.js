@@ -10,43 +10,37 @@ export default function Login() {
   const [phone, setPhone] = useState('')
   const router = useRouter()
 
-  // ✅ Always track auth changes
+  // ✅ Check for session when component mounts (just once)
   useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        router.push('/dashboard')
-      }
-    })
-
-    return () => {
-      subscription.unsubscribe()
-    }
-  }, [])
-
-  // ✅ Delay before checking session to avoid loop
-  useEffect(() => {
-    const checkSession = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 800)) // 👈 delay added
-
+    const getSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
       if (session) {
-        router.push('/dashboard')
+        router.replace('/dashboard')
       }
     }
 
-    checkSession()
+    getSession()
+
+    // ✅ Subscribe to auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session) {
+        router.replace('/dashboard')
+      }
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/dashboard',
+        redirectTo: 'https://www.drn.today/login', // redirects back here, which will then push to /dashboard
       },
     })
   }
