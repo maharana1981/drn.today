@@ -1,46 +1,50 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '../lib/supabase'
-import { Button } from '../components/ui/button'
-import { Input } from '../components/ui/input'
+import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { motion } from 'framer-motion'
 
 export default function Login() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
-  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // ✅ Detect existing session and redirect to dashboard
+  // ✅ Always track auth changes
   useEffect(() => {
-    const syncSession = async () => {
-      // Try getSession first
-      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession()
-      console.log('🔥 getSession:', sessionData, sessionErr)
-
-      if (sessionData?.session) {
-        return router.push('/dashboard')
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session) {
+        router.push('/dashboard')
       }
+    })
 
-      // Fallback: getUser (works if session cookie exists but getSession fails)
-      const { data: userData, error: userErr } = await supabase.auth.getUser()
-      console.log('🧠 getUser:', userData, userErr)
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
-      if (userData?.user) {
-        return router.push('/dashboard')
+  // ✅ Just a one-time session check in case user already logged in
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        router.push('/dashboard')
       }
-
-      setLoading(false) // no session found
     }
 
-    syncSession()
+    checkSession()
   }, [])
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/login', // ✅ Must point back here
+        redirectTo: 'https://www.drn.today/login', // after login, user comes back here
       },
     })
   }
@@ -59,14 +63,6 @@ export default function Login() {
     else alert('OTP sent to phone!')
   }
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen text-blue-700 text-xl">
-        Checking login session...
-      </div>
-    )
-  }
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-white to-slate-100">
       <motion.h1
@@ -83,7 +79,6 @@ export default function Login() {
         whileTap={{ scale: 0.98 }}
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-sm space-y-4"
       >
-        {/* ✅ Google Login */}
         <Button
           onClick={handleGoogleLogin}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white"
@@ -91,7 +86,6 @@ export default function Login() {
           Login with Google
         </Button>
 
-        {/* ✅ Email Magic Link */}
         <div className="space-y-2">
           <Input
             type="email"
@@ -104,7 +98,6 @@ export default function Login() {
           </Button>
         </div>
 
-        {/* ✅ Phone OTP */}
         <div className="space-y-2">
           <Input
             type="tel"
