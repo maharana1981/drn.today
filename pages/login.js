@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
@@ -7,12 +8,28 @@ import { motion } from 'framer-motion'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const router = useRouter()
+
+  // ✅ Auto-redirect to dashboard if session exists
+  useEffect(() => {
+    const checkSession = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession()
+
+      if (session) {
+        router.push('/dashboard')
+      }
+    }
+
+    checkSession()
+  }, [])
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/dashboard', // ✅ REDIRECT TO DASHBOARD AFTER LOGIN
+        redirectTo: 'https://www.drn.today/dashboard', // or use /login if redirect handled here
       },
     })
   }
