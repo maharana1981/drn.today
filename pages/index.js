@@ -26,7 +26,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>drn.today – Dynamic Reality Network</title>
+        <title>DRN.today – Dynamic Reality Network</title>
       </Head>
 
       <div className="min-h-screen bg-gradient-to-b from-white to-slate-100 text-gray-800">
