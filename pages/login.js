@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabaseClient'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { motion } from 'framer-motion'

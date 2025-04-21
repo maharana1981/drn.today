@@ -1,6 +1,6 @@
 import '@/styles/globals.css'
 import { useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase } from '../lib/supabaseClient'
 
 export default function App({ Component, pageProps }) {
   useEffect(() => {
