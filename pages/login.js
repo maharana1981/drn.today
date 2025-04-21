@@ -49,7 +49,7 @@ export default function Login() {
         <div className="space-y-2">
           <Input
             type="email"
-            placeholder="Email for magic link"
+            placeholder="Enter email for magic link"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -59,7 +59,7 @@ export default function Login() {
         <div className="space-y-2">
           <Input
             type="tel"
-            placeholder="Phone for OTP"
+            placeholder="Enter your phone for OTP"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
           />
