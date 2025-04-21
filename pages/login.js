@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '../lib/supabase'
 import { Button } from '../components/ui/button'
@@ -8,28 +8,39 @@ import { motion } from 'framer-motion'
 export default function Login() {
   const [email, setEmail] = useState('')
   const [phone, setPhone] = useState('')
+  const [loading, setLoading] = useState(true)
   const router = useRouter()
 
-  // ✅ Auto-redirect to dashboard if session exists
+  // ✅ Detect existing session and redirect to dashboard
   useEffect(() => {
-    const checkSession = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+    const syncSession = async () => {
+      // Try getSession first
+      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession()
+      console.log('🔥 getSession:', sessionData, sessionErr)
 
-      if (session) {
-        router.push('/dashboard')
+      if (sessionData?.session) {
+        return router.push('/dashboard')
       }
+
+      // Fallback: getUser (works if session cookie exists but getSession fails)
+      const { data: userData, error: userErr } = await supabase.auth.getUser()
+      console.log('🧠 getUser:', userData, userErr)
+
+      if (userData?.user) {
+        return router.push('/dashboard')
+      }
+
+      setLoading(false) // no session found
     }
 
-    checkSession()
+    syncSession()
   }, [])
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/login', // or use /login if redirect handled here
+        redirectTo: 'https://www.drn.today/login', // ✅ Must point back here
       },
     })
   }
@@ -46,6 +57,14 @@ export default function Login() {
     const { error } = await supabase.auth.signInWithOtp({ phone })
     if (error) alert(error.message)
     else alert('OTP sent to phone!')
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen text-blue-700 text-xl">
+        Checking login session...
+      </div>
+    )
   }
 
   return (
