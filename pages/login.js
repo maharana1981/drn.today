@@ -46,7 +46,7 @@ export default function Login() {
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: 'https://www.drn.today/login',
+        redirectTo: 'https://www.drn.today/dashboard',
       },
     })
   }
