@@ -17,7 +17,7 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="text-3xl font-bold mb-8 text-blue-700"
       >
-        Journalist Login
+        DRN.today Login
       </motion.h1>
       
       <motion.div
