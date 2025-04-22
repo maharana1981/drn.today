@@ -2,6 +2,7 @@ import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
 import AIFactChecker from '@/components/AIFactChecker'
+import AIHeadlineOptimizer from '@/components/AIHeadlineOptimizer'
 import MediaEditor from '@/components/MediaEditor'
 import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
@@ -15,6 +16,7 @@ export default function Newsroom() {
       <SmartComposer />
       <AIResearchAssistant />
       <AIFactChecker />
+      <AIHeadlineOptimizer />
       <MediaEditor />
       <ContentCalendar />
       <AnalyticsPanel />
