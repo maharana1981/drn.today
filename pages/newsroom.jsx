@@ -17,10 +17,10 @@ import CollaborationRoom from '@/components/CollaborationRoom'
 import TipInbox from '@/components/TipInbox'
 
 
-export default function NewsroomFinal() {
+export default function Newsroom() {
   return (
     <DashboardLayout>
-      <h1 className='text-2xl font-bold text-blue-700 mb-6'>🧪 Newsroom Dashboard (Dev Mode)</h1>
+      <h1 className='text-2xl font-bold text-blue-700 mb-6'>DRN.today Newsroom</h1>
 
       <SmartComposer />
       <AIResearchAssistant />
