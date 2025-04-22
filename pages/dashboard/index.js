@@ -6,7 +6,7 @@ import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
 
-export default function Dashboard() {
+export default function Newsroom() {
   return (
     <DashboardLayout>
       <motion.h1
