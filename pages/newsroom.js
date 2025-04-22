@@ -14,6 +14,8 @@ import MediaEditor from '@/components/MediaEditor'
 import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
 import CollaborationRoom from '@/components/CollaborationRoom'
+import TipInbox from '@/components/TipInbox'
+
 
 export default function Newsroom() {
   return (
@@ -35,6 +37,8 @@ export default function Newsroom() {
       <ContentCalendar />
       <AnalyticsPanel />
       <CollaborationRoom />
+      <TipInbox />
+
     </DashboardLayout>
   )
 }
