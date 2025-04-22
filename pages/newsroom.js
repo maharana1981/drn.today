@@ -3,6 +3,7 @@ import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
 import AIFactChecker from '@/components/AIFactChecker'
 import AIHeadlineOptimizer from '@/components/AIHeadlineOptimizer'
+import AutoTranslator from '@/components/AutoTranslator'
 import MediaEditor from '@/components/MediaEditor'
 import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
@@ -17,6 +18,7 @@ export default function Newsroom() {
       <AIResearchAssistant />
       <AIFactChecker />
       <AIHeadlineOptimizer />
+      <AutoTranslator />
       <MediaEditor />
       <ContentCalendar />
       <AnalyticsPanel />
