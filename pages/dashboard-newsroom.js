@@ -17,7 +17,7 @@ import CollaborationRoom from '@/components/CollaborationRoom'
 import TipInbox from '@/components/TipInbox'
 
 
-export default function Newsroom() {
+export default function DashboardNewsroom() {
   return (
     <DashboardLayout>
       <h1 className='text-2xl font-bold text-blue-700 mb-6'>🧪 Newsroom Dashboard (Dev Mode)</h1>
