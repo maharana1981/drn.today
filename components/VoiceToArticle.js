@@ -21,12 +21,12 @@ export default function VoiceToArticle() {
       const url = URL.createObjectURL(blob)
       setAudioURL(url)
 
-      // Simulate transcription
+      // Simulate AI transcription
       setTimeout(() => {
         setTranscript(
-          '🎤 “Today’s top story is about the increasing global water crisis, and how cities are adapting to shortages.”'
+          '🎤 “Today’s top story is about the increasing global water crisis and how cities are adapting.”'
         )
-      }, 2000)
+      }, 1500)
     }
 
     recorder.start()
@@ -39,17 +39,17 @@ export default function VoiceToArticle() {
     setRecording(false)
   }
 
-  const handleFileUpload = (e) => {
+  const handleUpload = (e) => {
     const file = e.target.files[0]
     if (file) {
       setAudioURL(URL.createObjectURL(file))
 
-      // Simulate transcription
+      // Simulate AI transcription
       setTimeout(() => {
         setTranscript(
-          '📂 “Uploaded audio transcription: Experts warn that climate change could accelerate the depletion of groundwater.”'
+          '📂 “Uploaded audio transcription: Experts warn that climate change could accelerate groundwater depletion.”'
         )
-      }, 2000)
+      }, 1500)
     }
   }
 
@@ -57,11 +57,12 @@ export default function VoiceToArticle() {
     <Card className="mb-6">
       <CardContent className="space-y-4 p-4">
         <h2 className="text-xl font-semibold">🎤 Voice-to-Article Converter</h2>
-        <div className="flex flex-col md:flex-row gap-4">
+
+        <div className="flex flex-wrap gap-4">
           <Button onClick={recording ? stopRecording : startRecording}>
             {recording ? '⏹️ Stop Recording' : '🎙️ Start Recording'}
           </Button>
-          <Input type="file" accept="audio/*" onChange={handleFileUpload} />
+          <Input type="file" accept="audio/*" onChange={handleUpload} />
         </div>
 
         {audioURL && (
@@ -72,4 +73,11 @@ export default function VoiceToArticle() {
 
         {transcript && (
           <div className="mt-4">
-            <p className="text-sm
+            <p className="text-sm text-muted-foreground mb-1">🧠 AI Transcription:</p>
+            <Textarea rows={5} value={transcript} readOnly className="bg-white" />
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  )
+}
