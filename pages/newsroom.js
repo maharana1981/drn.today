@@ -1,6 +1,7 @@
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
+import AIFactChecker from '@/components/AIFactChecker'
 import MediaEditor from '@/components/MediaEditor'
 import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
@@ -13,6 +14,7 @@ export default function Newsroom() {
 
       <SmartComposer />
       <AIResearchAssistant />
+      <AIFactChecker />
       <MediaEditor />
       <ContentCalendar />
       <AnalyticsPanel />
