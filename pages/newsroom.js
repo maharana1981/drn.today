@@ -5,6 +5,7 @@ import AIFactChecker from '@/components/AIFactChecker'
 import AIHeadlineOptimizer from '@/components/AIHeadlineOptimizer'
 import AutoTranslator from '@/components/AutoTranslator'
 import VoiceToArticle from '@/components/VoiceToArticle'
+import PhotoSelector from '@/components/PhotoSelector'
 import MediaEditor from '@/components/MediaEditor'
 import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
@@ -21,6 +22,7 @@ export default function Newsroom() {
       <AIHeadlineOptimizer />
       <AutoTranslator />
       <VoiceToArticle />
+      <PhotoSelector />
       <MediaEditor />
       <ContentCalendar />
       <AnalyticsPanel />
