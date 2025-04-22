@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 
 export default function SchedulingAssistant() {
   const [dateTime, setDateTime] = useState('')
@@ -18,7 +17,7 @@ export default function SchedulingAssistant() {
         <h2 className="text-xl font-semibold">🕒 Smart Scheduling Assistant</h2>
 
         <div className="space-y-2">
-          <Label htmlFor="schedule">Pick a Date & Time</Label>
+          <p className="text-sm font-medium">Pick a Date & Time</p>
           <Input
             id="schedule"
             type="datetime-local"
