@@ -21,13 +21,37 @@ export default function PublicHome() {
       <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
-        {['Trending', 'World', 'Politics', 'Business', 'Finance', 'Technology', 'Sports', 'Entertainment', 'Gaming', 'Education', 'Health', 'Environment', 'Weather', 'Law & Crime', 'Innovation', 'Culture & Society', 'Travel', 'Religion', 'India', 'City Updates']
-].map((cat) => (
-          <Badge key={cat} variant="outline" className="cursor-pointer text-white border-white">
-            {cat}
+        {[
+          { label: 'Trending', value: 'trending' },
+          { label: 'World', value: 'world' },
+          { label: 'Politics', value: 'politics' },
+          { label: 'Business', value: 'business' },
+          { label: 'Finance', value: 'finance' },
+          { label: 'Technology', value: 'technology' },
+          { label: 'Sports', value: 'sports' },
+          { label: 'Entertainment', value: 'entertainment' },
+          { label: 'Gaming', value: 'gaming' },
+          { label: 'Education', value: 'education' },
+          { label: 'Health', value: 'health' },
+          { label: 'Environment', value: 'environment' },
+          { label: 'Weather', value: 'weather' },
+          { label: 'Law & Crime', value: 'law-crime' },
+          { label: 'Innovation', value: 'innovation' },
+          { label: 'Culture & Society', value: 'culture-society' },
+          { label: 'Travel', value: 'travel' },
+          { label: 'Religion', value: 'religion' },
+          { label: 'India', value: 'india' },
+          { label: 'City Updates', value: 'city-updates' }
+        ].map(({ label, value }) => (
+          <Badge key={value} variant="outline" className="cursor-pointer text-white border-white">
+            {label}
           </Badge>
         ))}
       </div>
+
+      {posts.length === 0 && (
+        <p className="text-center text-gray-400">No posts available.</p>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {posts.map((post) => (
