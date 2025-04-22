@@ -13,7 +13,10 @@ export default function PostPage() {
     if (slug) {
       const fetchPost = async () => {
         const { data } = await supabase.from('posts').select('*').eq('slug', slug).single()
-        setPost(data)
+        if (data) {
+          await supabase.from('posts').update({ views: (data.views || 0) + 1 }).eq('id', data.id)
+          setPost({ ...data, views: (data.views || 0) + 1 })
+        }
       }
       fetchPost()
     }
@@ -26,6 +29,8 @@ export default function PostPage() {
       <Link href="/" className="text-blue-400 hover:underline">← Back to Home</Link>
       <h1 className="text-3xl font-bold mt-4 mb-2">{post.title}</h1>
       <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
+      <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
+
       <div className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap">
         {post.content || post.summary}
       </div>
