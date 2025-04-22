@@ -7,6 +7,7 @@ import AutoTranslator from '@/components/AutoTranslator'
 import VoiceToArticle from '@/components/VoiceToArticle'
 import PhotoSelector from '@/components/PhotoSelector'
 import BreakingNewsTicker from '@/components/BreakingNewsTicker'
+import PressRewriter from '@/components/PressRewriter'
 import SchedulingAssistant from '@/components/SchedulingAssistant'
 import EarningsDashboard from '@/components/EarningsDashboard'
 import MediaEditor from '@/components/MediaEditor'
@@ -27,6 +28,7 @@ export default function Newsroom() {
       <VoiceToArticle />
       <PhotoSelector />
       <BreakingNewsTicker />
+      <PressRewriter />
       <SchedulingAssistant />
       <EarningsDashboard />
       <MediaEditor />
