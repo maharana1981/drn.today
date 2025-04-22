@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router'
-import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -8,31 +6,9 @@ import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant' // ✅ NEW
 
+// 🚧 TEMP: Disabled auth check so dashboard is publicly viewable for development
+
 export default function Dashboard() {
-  const router = useRouter()
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { session },
-        error,
-      } = await supabase.auth.getSession()
-
-      if (error || !session || session.user.user_metadata.role !== 'journalist') {
-        router.push('/login')
-      } else {
-        setUser(session.user)
-      }
-      setLoading(false)
-    }
-
-    getUser()
-  }, [])
-
-  if (loading) return <div className="p-6">Loading...</div>
-
   return (
     <DashboardLayout>
       <motion.h1
@@ -44,12 +20,8 @@ export default function Dashboard() {
       </motion.h1>
 
       {/* ✅ Composer + AI Research */}
-      {user && (
-        <>
-          <SmartComposer />
-          <AIResearchAssistant />
-        </>
-      )}
+      <SmartComposer />
+      <AIResearchAssistant />
 
       {/* 📦 Feature Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -99,7 +71,4 @@ export default function Dashboard() {
       {/* 🔓 Sign Out */}
       <div className="mt-10">
         <Button onClick={() => supabase.auth.signOut()}>Sign Out</Button>
-      </div>
-    </DashboardLayout>
-  )
-}
+      </div
