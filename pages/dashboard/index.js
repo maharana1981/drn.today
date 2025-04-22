@@ -14,7 +14,7 @@ export default function Dashboard() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
       >
-        DRN.today Dashboard
+        DRN.today Newsroom
       </motion.h1>
 
       <SmartComposer />
