@@ -8,6 +8,8 @@ import { motion } from 'framer-motion'
 export default function PublicHome() {
   const [posts, setPosts] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
+  const [activeLocation, setActiveLocation] = useState('all')
+  const [search, setSearch] = useState('')
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -17,13 +19,28 @@ export default function PublicHome() {
     fetchPosts()
   }, [])
 
-  const filteredPosts = activeCategory === 'all'
-    ? posts
-    : posts.filter(post => post.category?.toLowerCase() === activeCategory.toLowerCase())
+  const filteredPosts = posts.filter(post => {
+    const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
+    const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
+    const matchSearch = post.title?.toLowerCase().includes(search.toLowerCase()) || post.summary?.toLowerCase().includes(search.toLowerCase())
+    return matchCategory && matchLocation && matchSearch
+  })
+
+  const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
 
   return (
     <div className="min-h-screen bg-black text-white px-4 py-6">
       <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
+
+      <div className="mb-4 flex justify-center">
+        <input
+          type="text"
+          placeholder="Search news..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full max-w-xl px-4 py-2 rounded text-black"
+        />
+      </div>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         {[
@@ -52,11 +69,21 @@ export default function PublicHome() {
           <Badge
             key={value}
             onClick={() => setActiveCategory(value)}
-            className={`cursor-pointer border-white px-3 py-1 ${
-              activeCategory === value ? 'bg-white text-black' : 'text-white'
-            }`}
+            className={`cursor-pointer border-white px-3 py-1 ${activeCategory === value ? 'bg-white text-black' : 'text-white'}`}
           >
             {label}
+          </Badge>
+        ))}
+      </div>
+
+      <div className="mb-6 flex flex-wrap justify-center gap-2">
+        {locations.map((loc) => (
+          <Badge
+            key={loc}
+            onClick={() => setActiveLocation(loc)}
+            className={`cursor-pointer border-white px-3 py-1 capitalize ${activeLocation === loc ? 'bg-white text-black' : 'text-white'}`}
+          >
+            {loc}
           </Badge>
         ))}
       </div>
@@ -88,4 +115,3 @@ export default function PublicHome() {
     </div>
   )
 }
-
