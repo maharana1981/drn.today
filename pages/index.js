@@ -18,10 +18,11 @@ export default function PublicHome() {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 py-6">
-      <h1 className="text-3xl font-bold mb-4 text-center">🌐 DRN.today – Global News, Real-Time</h1>
+      <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
-        {['Trending', 'Finance', 'Politics', 'Weather', 'Technology', 'Sports', 'Health', 'International'].map((cat) => (
+        {['Trending', 'World', 'Politics', 'Business', 'Finance', 'Technology', 'Sports', 'Entertainment', 'Gaming', 'Education', 'Health', 'Environment', 'Weather', 'Law & Crime', 'Innovation', 'Culture & Society', 'Travel', 'Religion', 'India', 'City Updates']
+].map((cat) => (
           <Badge key={cat} variant="outline" className="cursor-pointer text-white border-white">
             {cat}
           </Badge>
