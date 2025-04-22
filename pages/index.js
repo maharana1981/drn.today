@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 
 export default function PublicHome() {
   const [posts, setPosts] = useState([])
+  const [activeCategory, setActiveCategory] = useState('all')
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -16,12 +17,17 @@ export default function PublicHome() {
     fetchPosts()
   }, [])
 
+  const filteredPosts = activeCategory === 'all'
+    ? posts
+    : posts.filter(post => post.category?.toLowerCase() === activeCategory.toLowerCase())
+
   return (
     <div className="min-h-screen bg-black text-white px-4 py-6">
       <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
         {[
+          { label: 'All', value: 'all' },
           { label: 'Trending', value: 'trending' },
           { label: 'World', value: 'world' },
           { label: 'Politics', value: 'politics' },
@@ -43,18 +49,24 @@ export default function PublicHome() {
           { label: 'India', value: 'india' },
           { label: 'City Updates', value: 'city-updates' }
         ].map(({ label, value }) => (
-          <Badge key={value} variant="outline" className="cursor-pointer text-white border-white">
+          <Badge
+            key={value}
+            onClick={() => setActiveCategory(value)}
+            className={`cursor-pointer border-white px-3 py-1 ${
+              activeCategory === value ? 'bg-white text-black' : 'text-white'
+            }`}
+          >
             {label}
           </Badge>
         ))}
       </div>
 
-      {posts.length === 0 && (
+      {filteredPosts.length === 0 && (
         <p className="text-center text-gray-400">No posts available.</p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {posts.map((post) => (
+        {filteredPosts.map((post) => (
           <motion.div
             key={post.id}
             initial={{ opacity: 0, scale: 0.9 }}
@@ -76,5 +88,4 @@ export default function PublicHome() {
     </div>
   )
 }
-// trigger deploy
-// force deploy
+
