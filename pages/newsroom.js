@@ -6,6 +6,7 @@ import AIHeadlineOptimizer from '@/components/AIHeadlineOptimizer'
 import AutoTranslator from '@/components/AutoTranslator'
 import VoiceToArticle from '@/components/VoiceToArticle'
 import PhotoSelector from '@/components/PhotoSelector'
+import BreakingNewsTicker from '@/components/BreakingNewsTicker'
 import SchedulingAssistant from '@/components/SchedulingAssistant'
 import EarningsDashboard from '@/components/EarningsDashboard'
 import MediaEditor from '@/components/MediaEditor'
@@ -25,6 +26,7 @@ export default function Newsroom() {
       <AutoTranslator />
       <VoiceToArticle />
       <PhotoSelector />
+      <BreakingNewsTicker />
       <SchedulingAssistant />
       <EarningsDashboard />
       <MediaEditor />
