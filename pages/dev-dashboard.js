@@ -1,3 +1,5 @@
+
+// ✅ Trigger deployment - DevDashboard active
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
@@ -20,3 +22,4 @@ export default function DevDashboard() {
     </DashboardLayout>
   )
 }
+
