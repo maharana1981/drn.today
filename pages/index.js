@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -13,29 +13,55 @@ export default function PublicHome() {
   const [activeLocation, setActiveLocation] = useState('all')
   const [search, setSearch] = useState('')
   const [sortMode, setSortMode] = useState('latest')
+  const [page, setPage] = useState(0)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const observerRef = useRef()
+  const POSTS_PER_PAGE = 6
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const { data } = await supabase.from('posts').select('*')
-      if (data) {
-        setPosts(data)
+  const fetchPosts = useCallback(async (reset = false) => {
+    setLoadingMore(true)
+    const from = reset ? 0 : page * POSTS_PER_PAGE
+    const to = from + POSTS_PER_PAGE - 1
+    const { data } = await supabase
+      .from('posts')
+      .select('*')
+      .order(sortMode === 'trending' ? 'views' : 'created_at', { ascending: false })
+      .range(from, to)
+
+    if (data) {
+      setPosts(prev => reset ? data : [...prev, ...data])
+      if (reset) {
         setBreakingNews(data.filter(p => p.breaking))
       }
     }
-    fetchPosts()
-  }, [])
+    setLoadingMore(false)
+  }, [page, sortMode])
+
+  useEffect(() => {
+    setPage(0)
+    fetchPosts(true)
+  }, [activeCategory, activeLocation, search, sortMode])
+
+  useEffect(() => {
+    if (!observerRef.current) return
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        setPage(prev => prev + 1)
+      }
+    }, { threshold: 1 })
+    observer.observe(observerRef.current)
+    return () => observer.disconnect()
+  }, [observerRef.current])
+
+  useEffect(() => {
+    if (page > 0) fetchPosts()
+  }, [page])
 
   const filteredPosts = posts.filter(post => {
     const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
     const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
     const matchSearch = post.title?.toLowerCase().includes(search.toLowerCase()) || post.summary?.toLowerCase().includes(search.toLowerCase())
     return matchCategory && matchLocation && matchSearch
-  })
-
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    return sortMode === 'trending'
-      ? (b.views || 0) - (a.views || 0)
-      : new Date(b.created_at) - new Date(a.created_at)
   })
 
   const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
@@ -73,29 +99,7 @@ export default function PublicHome() {
       </div>
 
       <div className="mb-4 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
-        {[
-          { label: 'All', value: 'all' },
-          { label: 'Trending', value: 'trending' },
-          { label: 'World', value: 'world' },
-          { label: 'Politics', value: 'politics' },
-          { label: 'Business', value: 'business' },
-          { label: 'Finance', value: 'finance' },
-          { label: 'Technology', value: 'technology' },
-          { label: 'Sports', value: 'sports' },
-          { label: 'Entertainment', value: 'entertainment' },
-          { label: 'Gaming', value: 'gaming' },
-          { label: 'Education', value: 'education' },
-          { label: 'Health', value: 'health' },
-          { label: 'Environment', value: 'environment' },
-          { label: 'Weather', value: 'weather' },
-          { label: 'Law & Crime', value: 'law-crime' },
-          { label: 'Innovation', value: 'innovation' },
-          { label: 'Culture & Society', value: 'culture-society' },
-          { label: 'Travel', value: 'travel' },
-          { label: 'Religion', value: 'religion' },
-          { label: 'India', value: 'india' },
-          { label: 'City Updates', value: 'city-updates' }
-        ].map(({ label, value }) => (
+        {[{ label: 'All', value: 'all' }, { label: 'Trending', value: 'trending' }, { label: 'World', value: 'world' }, { label: 'Politics', value: 'politics' }, { label: 'Business', value: 'business' }, { label: 'Finance', value: 'finance' }, { label: 'Technology', value: 'technology' }, { label: 'Sports', value: 'sports' }, { label: 'Entertainment', value: 'entertainment' }, { label: 'Gaming', value: 'gaming' }, { label: 'Education', value: 'education' }, { label: 'Health', value: 'health' }, { label: 'Environment', value: 'environment' }, { label: 'Weather', value: 'weather' }, { label: 'Law & Crime', value: 'law-crime' }, { label: 'Innovation', value: 'innovation' }, { label: 'Culture & Society', value: 'culture-society' }, { label: 'Travel', value: 'travel' }, { label: 'Religion', value: 'religion' }, { label: 'India', value: 'india' }, { label: 'City Updates', value: 'city-updates' }].map(({ label, value }) => (
           <Badge
             key={value}
             onClick={() => setActiveCategory(value)}
@@ -120,12 +124,12 @@ export default function PublicHome() {
 
       <TopStories />
 
-      {sortedPosts.length === 0 && (
+      {filteredPosts.length === 0 && (
         <p className="text-center text-gray-400">No posts available.</p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedPosts.map((post) => (
+        {filteredPosts.map((post) => (
           <motion.div
             key={post.id}
             initial={{ opacity: 0, scale: 0.9 }}
@@ -158,6 +162,10 @@ export default function PublicHome() {
             </Card>
           </motion.div>
         ))}
+      </div>
+
+      <div ref={observerRef} className="py-10 text-center">
+        {loadingMore && <p className="text-gray-400">Loading more...</p>}
       </div>
     </div>
   )
