@@ -16,6 +16,7 @@ export default function PublicHome() {
   const [page, setPage] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
+  const [bookmarks, setBookmarks] = useState([])
   const observerRef = useRef()
   const POSTS_PER_PAGE = 6
 
@@ -59,27 +60,24 @@ export default function PublicHome() {
   }, [page])
 
   useEffect(() => {
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      Notification.requestPermission()
-    }
-  }, [])
-
-  useEffect(() => {
     const savedLocation = localStorage.getItem('preferredLocation')
     if (savedLocation) {
       setActiveLocation(savedLocation)
-    } else {
-      const regionGuess = (Intl.DateTimeFormat().resolvedOptions().locale || '').toLowerCase()
-      const locationMap = {
-        'en-in': 'india',
-        'en-us': 'new york',
-        'en-gb': 'london',
-        'ja-jp': 'tokyo'
-      }
-      const guessed = locationMap[regionGuess]
-      if (guessed) setActiveLocation(guessed)
     }
+    const savedBookmarks = JSON.parse(localStorage.getItem('bookmarkedPosts') || '[]')
+    setBookmarks(savedBookmarks)
   }, [])
+
+  const toggleBookmark = (postId) => {
+    let updated = []
+    if (bookmarks.includes(postId)) {
+      updated = bookmarks.filter(id => id !== postId)
+    } else {
+      updated = [...bookmarks, postId]
+    }
+    setBookmarks(updated)
+    localStorage.setItem('bookmarkedPosts', JSON.stringify(updated))
+  }
 
   const filteredPosts = posts.filter(post => {
     const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
@@ -88,11 +86,9 @@ export default function PublicHome() {
     return matchCategory && matchLocation && matchSearch
   })
 
-  const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
-
   const translate = (text) => {
     const lang = navigator.language || 'en'
-    return lang.startsWith('en') ? text : text // Plug API here
+    return lang.startsWith('en') ? text : text // Real translation logic/API can be inserted here
   }
 
   const toggleTheme = () => setDarkMode(!darkMode)
@@ -101,6 +97,8 @@ export default function PublicHome() {
     setActiveLocation(loc)
     localStorage.setItem('preferredLocation', loc)
   }
+
+  const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} px-4 py-6`}>
@@ -185,19 +183,24 @@ export default function PublicHome() {
                 <video src={post.video_url} controls className="w-full h-40 object-cover rounded-t" />
               )}
               <CardContent className="p-4">
-                <Link href={`/post/${post.slug}`}>
-                  <h2 className="text-xl font-semibold hover:underline">{translate(post.title)}</h2>
-                </Link>
+                <div className="flex justify-between items-start">
+                  <Link href={`/post/${post.slug}`}>
+                    <h2 className="text-xl font-semibold hover:underline">{translate(post.title)}</h2>
+                  </Link>
+                  <button onClick={() => toggleBookmark(post.id)} className="text-yellow-500 text-sm ml-2">
+                    {bookmarks.includes(post.id) ? '🔖 Saved' : '➕ Save'}
+                  </button>
+                </div>
                 <p className="text-sm text-gray-500 mt-1">{post.location} · {post.category}</p>
-                <p className="text-sm text-gray-600">👁️ {post.views || 0} views</p>
+                <p className="text-sm text-gray-600">👁️ {post.views || 0} views · ❤️ {post.reactions || 0} likes · 🔁 {post.shares || 0} shares</p>
+                <div className="text-xs text-green-600 mt-1">
+                  {post.views > 1000 && '#trending'} {post.exclusive && '#exclusive'}
+                </div>
                 <div
                   className="text-gray-700 text-sm mt-2 line-clamp-3 hover:line-clamp-none transition-all duration-200"
                   title="Hover to expand full summary"
                 >
                   {translate(post.summary)}
-                </div>
-                <div className="mt-2 text-right">
-                  <button className="text-red-500 hover:text-red-600 text-sm">❤️ Like</button>
                 </div>
               </CardContent>
             </Card>
