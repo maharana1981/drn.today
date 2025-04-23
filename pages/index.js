@@ -8,6 +8,7 @@ import TopStories from '@/components/TopStories'
 
 export default function PublicHome() {
   const [posts, setPosts] = useState([])
+  const [isListening, setIsListening] = useState(false)
   const [breakingNews, setBreakingNews] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
   const [activeLocation, setActiveLocation] = useState('all')
@@ -20,6 +21,28 @@ export default function PublicHome() {
   const [commentInputs, setCommentInputs] = useState({})
   const observerRef = useRef()
   const POSTS_PER_PAGE = 6
+
+  const startVoiceSearch = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
+    if (!SpeechRecognition) {
+      alert('Your browser does not support voice search.')
+      return
+    }
+
+    const recognition = new SpeechRecognition()
+    recognition.lang = 'en-US'
+    recognition.interimResults = false
+    recognition.maxAlternatives = 1
+
+    recognition.onstart = () => setIsListening(true)
+    recognition.onend = () => setIsListening(false)
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript
+      setSearch(transcript)
+    }
+
+    recognition.start()
+  }
 
   const fetchPosts = useCallback(async (reset = false) => {
     setLoadingMore(true)
@@ -172,7 +195,7 @@ export default function PublicHome() {
         </div>
       )}
 
-      <div className="mb-4 flex justify-center">
+<div className="mb-4 flex justify-center items-center gap-2">
         <input
           type="text"
           placeholder="Search news..."
@@ -180,6 +203,13 @@ export default function PublicHome() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full max-w-xl px-4 py-2 rounded text-black"
         />
+        <button
+          onClick={startVoiceSearch}
+          className={`px-3 py-2 rounded ${isListening ? 'bg-red-500 text-white' : 'bg-gray-200 text-black'}`}
+          title="Voice Search"
+        >
+          🎤
+        </button>
       </div>
 
       <div className="flex justify-center gap-4 mb-6">
@@ -210,6 +240,7 @@ export default function PublicHome() {
           </Badge>
         ))}
       </div>
+
 
       <TopStories />
 
