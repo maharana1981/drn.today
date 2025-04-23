@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 
 export default function PublicHome() {
   const [posts, setPosts] = useState([])
+  const [breakingNews, setBreakingNews] = useState([])
   const [activeCategory, setActiveCategory] = useState('all')
   const [activeLocation, setActiveLocation] = useState('all')
   const [search, setSearch] = useState('')
@@ -15,7 +16,10 @@ export default function PublicHome() {
   useEffect(() => {
     const fetchPosts = async () => {
       const { data } = await supabase.from('posts').select('*')
-      if (data) setPosts(data)
+      if (data) {
+        setPosts(data)
+        setBreakingNews(data.filter(p => p.breaking))
+      }
     }
     fetchPosts()
   }, [])
@@ -37,6 +41,19 @@ export default function PublicHome() {
 
   return (
     <div className="min-h-screen bg-black text-white px-4 py-6">
+      {breakingNews.length > 0 && (
+        <div className="bg-red-600 text-white py-2 px-4 rounded mb-4 overflow-hidden whitespace-nowrap animate-marquee">
+          <span className="font-bold mr-4">🚨 Breaking:</span>
+          {breakingNews.map((post, i) => (
+            <span key={post.id} className="mx-4">
+              <Link href={`/post/${post.slug}`} className="hover:underline">
+                {post.title}
+              </Link>
+            </span>
+          ))}
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
 
       <div className="mb-4 flex justify-center">
