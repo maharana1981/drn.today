@@ -64,6 +64,23 @@ export default function PublicHome() {
     }
   }, [])
 
+  useEffect(() => {
+    const savedLocation = localStorage.getItem('preferredLocation')
+    if (savedLocation) {
+      setActiveLocation(savedLocation)
+    } else {
+      const regionGuess = (Intl.DateTimeFormat().resolvedOptions().locale || '').toLowerCase()
+      const locationMap = {
+        'en-in': 'india',
+        'en-us': 'new york',
+        'en-gb': 'london',
+        'ja-jp': 'tokyo'
+      }
+      const guessed = locationMap[regionGuess]
+      if (guessed) setActiveLocation(guessed)
+    }
+  }, [])
+
   const filteredPosts = posts.filter(post => {
     const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
     const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
@@ -75,10 +92,15 @@ export default function PublicHome() {
 
   const translate = (text) => {
     const lang = navigator.language || 'en'
-    return lang.startsWith('en') ? text : text // Replace with real translation API if needed
+    return lang.startsWith('en') ? text : text // Plug API here
   }
 
   const toggleTheme = () => setDarkMode(!darkMode)
+
+  const handleLocationSelect = (loc) => {
+    setActiveLocation(loc)
+    localStorage.setItem('preferredLocation', loc)
+  }
 
   return (
     <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} px-4 py-6`}>
@@ -133,7 +155,7 @@ export default function PublicHome() {
         {locations.map((loc) => (
           <Badge
             key={loc}
-            onClick={() => setActiveLocation(loc)}
+            onClick={() => handleLocationSelect(loc)}
             className={`cursor-pointer border px-3 py-1 mx-1 inline-block capitalize ${activeLocation === loc ? 'bg-black text-white' : 'text-black'}`}
           >
             {loc}
