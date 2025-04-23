@@ -25,20 +25,37 @@ export default function PublicHome() {
     setLoadingMore(true)
     const from = reset ? 0 : page * POSTS_PER_PAGE
     const to = from + POSTS_PER_PAGE - 1
-    const { data } = await supabase
+  
+    const { data: postsData } = await supabase
       .from('posts')
       .select('*')
       .order(sortMode === 'trending' ? 'views' : 'created_at', { ascending: false })
       .range(from, to)
-
-    if (data) {
-      setPosts(prev => reset ? data : [...prev, ...data])
-      if (reset) {
-        setBreakingNews(data.filter(p => p.breaking))
-      }
+  
+    // fetch all reactions for the current page of posts
+    const postIds = postsData.map(p => p.id)
+    const { data: reactions } = await supabase
+      .from('reactions')
+      .select('post_id, type, count:count(*)')
+      .in('post_id', postIds)
+      .group('post_id, type')
+  
+    // combine reactions with posts
+    const postsWithReactions = postsData.map(post => {
+      const like = reactions?.find(r => r.post_id === post.id && r.type === 'like')?.count || 0
+      const dislike = reactions?.find(r => r.post_id === post.id && r.type === 'dislike')?.count || 0
+      return { ...post, reactions: { like, dislike } }
+    })
+  
+    setPosts(prev => reset ? postsWithReactions : [...prev, ...postsWithReactions])
+  
+    if (reset) {
+      setBreakingNews(postsWithReactions.filter(p => p.breaking))
     }
+  
     setLoadingMore(false)
   }, [page, sortMode])
+  
 
   useEffect(() => {
     setPage(0)
@@ -226,10 +243,17 @@ export default function PublicHome() {
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{post.location} · {post.category}</p>
                 <div className="flex gap-4 text-sm text-gray-600 mt-1">
-                  <button onClick={() => handleReaction(post.id, 'like')}>❤️ Like</button>
-                  <button onClick={() => handleReaction(post.id, 'dislike')}>👎 Dislike</button>
-                  <button onClick={() => toggleBookmark(post.id)}>{bookmarks.includes(post.id) ? '🔖 Saved' : '➕ Save'}</button>
-                </div>
+  <button onClick={() => handleReaction(post.id, 'like')}>
+    ❤️ Like ({post.reactions?.like || 0})
+  </button>
+  <button onClick={() => handleReaction(post.id, 'dislike')}>
+    👎 Dislike ({post.reactions?.dislike || 0})
+  </button>
+  <button onClick={() => toggleBookmark(post.id)}>
+    {bookmarks.includes(post.id) ? '🔖 Saved' : '➕ Save'}
+  </button>
+</div>
+
                 <div className="text-xs text-green-600 mt-1">
                   {post.views > 1000 && '#trending'} {post.exclusive && '#exclusive'}
                 </div>
