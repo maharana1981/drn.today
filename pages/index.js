@@ -15,6 +15,7 @@ export default function PublicHome() {
   const [sortMode, setSortMode] = useState('latest')
   const [page, setPage] = useState(0)
   const [loadingMore, setLoadingMore] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
   const observerRef = useRef()
   const POSTS_PER_PAGE = 6
 
@@ -57,6 +58,12 @@ export default function PublicHome() {
     if (page > 0) fetchPosts()
   }, [page])
 
+  useEffect(() => {
+    if ('Notification' in window && Notification.permission !== 'granted') {
+      Notification.requestPermission()
+    }
+  }, [])
+
   const filteredPosts = posts.filter(post => {
     const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
     const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
@@ -66,8 +73,22 @@ export default function PublicHome() {
 
   const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
 
+  const translate = (text) => {
+    const lang = navigator.language || 'en'
+    return lang.startsWith('en') ? text : text // Replace with real translation API if needed
+  }
+
+  const toggleTheme = () => setDarkMode(!darkMode)
+
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-6">
+    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-white text-black'} px-4 py-6`}>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">DRN.today – Global News, Real-Time</h1>
+        <button onClick={toggleTheme} className="border px-3 py-1 rounded text-sm">
+          {darkMode ? '🌞 Light Mode' : '🌙 Dark Mode'}
+        </button>
+      </div>
+
       {breakingNews.length > 0 && (
         <div className="bg-red-600 text-white py-2 px-4 rounded mb-4 overflow-hidden whitespace-nowrap animate-marquee">
           <span className="font-bold mr-4">🚨 Breaking:</span>
@@ -81,8 +102,6 @@ export default function PublicHome() {
         </div>
       )}
 
-      <h1 className="text-3xl font-bold mb-4 text-center">DRN.today – Global News, Real-Time</h1>
-
       <div className="mb-4 flex justify-center">
         <input
           type="text"
@@ -94,8 +113,8 @@ export default function PublicHome() {
       </div>
 
       <div className="flex justify-center gap-4 mb-6">
-        <button onClick={() => setSortMode('latest')} className={`px-4 py-2 rounded ${sortMode === 'latest' ? 'bg-white text-black' : 'bg-gray-800 text-white'}`}>🕒 Latest</button>
-        <button onClick={() => setSortMode('trending')} className={`px-4 py-2 rounded ${sortMode === 'trending' ? 'bg-white text-black' : 'bg-gray-800 text-white'}`}>🔥 Trending</button>
+        <button onClick={() => setSortMode('latest')} className={`px-4 py-2 rounded ${sortMode === 'latest' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>🕒 Latest</button>
+        <button onClick={() => setSortMode('trending')} className={`px-4 py-2 rounded ${sortMode === 'trending' ? 'bg-black text-white' : 'bg-gray-200 text-black'}`}>🔥 Trending</button>
       </div>
 
       <div className="mb-4 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
@@ -103,7 +122,7 @@ export default function PublicHome() {
           <Badge
             key={value}
             onClick={() => setActiveCategory(value)}
-            className={`cursor-pointer border-white px-3 py-1 mx-1 inline-block ${activeCategory === value ? 'bg-white text-black' : 'text-white'}`}
+            className={`cursor-pointer border px-3 py-1 mx-1 inline-block ${activeCategory === value ? 'bg-black text-white' : 'text-black'}`}
           >
             {label}
           </Badge>
@@ -115,7 +134,7 @@ export default function PublicHome() {
           <Badge
             key={loc}
             onClick={() => setActiveLocation(loc)}
-            className={`cursor-pointer border-white px-3 py-1 mx-1 inline-block capitalize ${activeLocation === loc ? 'bg-white text-black' : 'text-white'}`}
+            className={`cursor-pointer border px-3 py-1 mx-1 inline-block capitalize ${activeLocation === loc ? 'bg-black text-white' : 'text-black'}`}
           >
             {loc}
           </Badge>
@@ -136,28 +155,28 @@ export default function PublicHome() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.3 }}
           >
-            <Card className="bg-slate-900 hover:shadow-lg hover:shadow-blue-500/30 transition-all">
+            <Card className={`hover:shadow-lg ${darkMode ? 'bg-gray-800' : 'bg-gray-100'} transition-all`}>
               {post.thumbnail_url && (
-                <img
-                  src={post.thumbnail_url}
-                  alt={post.title}
-                  className="w-full h-40 object-cover rounded-t"
-                />
+                <img src={post.thumbnail_url} alt={post.title} className="w-full h-40 object-cover rounded-t" />
               )}
               {!post.thumbnail_url && post.video_url && (
-                <video
-                  src={post.video_url}
-                  controls
-                  className="w-full h-40 object-cover rounded-t"
-                />
+                <video src={post.video_url} controls className="w-full h-40 object-cover rounded-t" />
               )}
               <CardContent className="p-4">
                 <Link href={`/post/${post.slug}`}>
-                  <h2 className="text-xl font-semibold text-blue-300 hover:underline">{post.title}</h2>
+                  <h2 className="text-xl font-semibold hover:underline">{translate(post.title)}</h2>
                 </Link>
-                <p className="text-sm text-gray-400 mt-1">{post.location} · {post.category}</p>
-                <p className="text-sm text-gray-500">👁️ {post.views || 0} views</p>
-                <p className="text-gray-200 text-sm mt-2 line-clamp-3">{post.summary}</p>
+                <p className="text-sm text-gray-500 mt-1">{post.location} · {post.category}</p>
+                <p className="text-sm text-gray-600">👁️ {post.views || 0} views</p>
+                <div
+                  className="text-gray-700 text-sm mt-2 line-clamp-3 hover:line-clamp-none transition-all duration-200"
+                  title="Hover to expand full summary"
+                >
+                  {translate(post.summary)}
+                </div>
+                <div className="mt-2 text-right">
+                  <button className="text-red-500 hover:text-red-600 text-sm">❤️ Like</button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
