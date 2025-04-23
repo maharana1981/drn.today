@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Link from 'next/link'
+import Head from 'next/head'
 
 export default function PostPage() {
   const router = useRouter()
@@ -74,55 +75,72 @@ export default function PostPage() {
   if (!post) return <div className="p-8 text-white text-center">Loading...</div>
 
   return (
-    <main className="max-w-3xl mx-auto p-6 text-white">
-      <Link href="/" className="text-blue-400 hover:underline">← Back to Home</Link>
-      <h1 className="text-3xl font-bold mt-4 mb-2">{post.title}</h1>
-      <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
-      <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
+    <>
+      <Head>
+        <title>{post?.title} | DRN.today</title>
+        <meta name="description" content={post?.summary || ''} />
 
-      <div className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap">
-        {post.content || post.summary}
-      </div>
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post?.title || ''} />
+        <meta property="og:description" content={post?.summary || ''} />
+        <meta property="og:image" content={post?.thumbnail_url || post?.video_url || ''} />
 
-      {post.video_url && (
-        <div className="mt-6">
-          <video src={post.video_url} controls className="w-full rounded" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post?.title || ''} />
+        <meta name="twitter:description" content={post?.summary || ''} />
+        <meta name="twitter:image" content={post?.thumbnail_url || post?.video_url || ''} />
+      </Head>
+
+      <main className="max-w-3xl mx-auto p-6 text-white">
+        <Link href="/" className="text-blue-400 hover:underline">← Back to Home</Link>
+        <h1 className="text-3xl font-bold mt-4 mb-2">{post.title}</h1>
+        <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
+        <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
+
+        <div className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap">
+          {post.content || post.summary}
         </div>
-      )}
 
-      {/* Comment input */}
-      <section className="mt-10">
-        <h2 className="text-xl font-bold mb-2">Leave a Comment</h2>
-        <form onSubmit={handleCommentSubmit} className="mb-6">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write your comment..."
-            className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600"
-            rows={3}
-          />
-          <button
-            type="submit"
-            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-            disabled={loading || !newComment.trim()}
-          >
-            {loading ? 'Posting...' : 'Post Comment'}
-          </button>
-        </form>
+        {post.video_url && (
+          <div className="mt-6">
+            <video src={post.video_url} controls className="w-full rounded" />
+          </div>
+        )}
 
-        {/* Comments list */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Comments</h3>
-          {comments.length === 0 && <p className="text-gray-400">No comments yet.</p>}
-          {comments.map((c) => (
-            <div key={c.id} className="mb-4 border-b border-gray-700 pb-2">
-              <p className="text-sm text-blue-400 font-semibold">{c.author_name || 'Anonymous'}</p>
-              <p className="text-gray-300 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
-              <p className="text-gray-500 text-xs mt-1">{new Date(c.created_at).toLocaleString()}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-    </main>
+        {/* Comment input */}
+        <section className="mt-10">
+          <h2 className="text-xl font-bold mb-2">Leave a Comment</h2>
+          <form onSubmit={handleCommentSubmit} className="mb-6">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Write your comment..."
+              className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600"
+              rows={3}
+            />
+            <button
+              type="submit"
+              className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+              disabled={loading || !newComment.trim()}
+            >
+              {loading ? 'Posting...' : 'Post Comment'}
+            </button>
+          </form>
+
+          {/* Comments list */}
+          <div>
+            <h3 className="text-lg font-semibold mb-3">Comments</h3>
+            {comments.length === 0 && <p className="text-gray-400">No comments yet.</p>}
+            {comments.map((c) => (
+              <div key={c.id} className="mb-4 border-b border-gray-700 pb-2">
+                <p className="text-sm text-blue-400 font-semibold">{c.author_name || 'Anonymous'}</p>
+                <p className="text-gray-300 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
+                <p className="text-gray-500 text-xs mt-1">{new Date(c.created_at).toLocaleString()}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </>
   )
 }
