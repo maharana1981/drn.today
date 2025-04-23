@@ -15,48 +15,51 @@ import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
 import CollaborationRoom from '@/components/CollaborationRoom'
 import TipInbox from '@/components/TipInbox'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
+
+const tools = [
+  { name: 'Smart Composer', component: <SmartComposer /> },
+  { name: 'Research Assistant', component: <AIResearchAssistant /> },
+  { name: 'Fact Checker', component: <AIFactChecker /> },
+  { name: 'Headline Optimizer', component: <AIHeadlineOptimizer /> },
+  { name: 'Auto Translator', component: <AutoTranslator /> },
+  { name: 'Voice to Article', component: <VoiceToArticle /> },
+  { name: 'Photo Selector', component: <PhotoSelector /> },
+  { name: 'Breaking News Ticker', component: <BreakingNewsTicker /> },
+  { name: 'Press Rewriter', component: <PressRewriter /> },
+  { name: 'Scheduling Assistant', component: <SchedulingAssistant /> },
+  { name: 'Earnings Dashboard', component: <EarningsDashboard /> },
+  { name: 'Media Editor', component: <MediaEditor /> },
+  { name: 'Content Calendar', component: <ContentCalendar /> },
+  { name: 'Analytics Panel', component: <AnalyticsPanel /> },
+  { name: 'Collaboration Room', component: <CollaborationRoom /> },
+  { name: 'Tip Inbox', component: <TipInbox /> },
+]
 
 export default function Newsroom() {
+  const [selectedTool, setSelectedTool] = useState(tools[0])
+
   return (
     <DashboardLayout>
-      <h1 className='text-2xl font-bold text-blue-700 mb-6'>DRN.today Newsroom</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <SmartComposer />
-        <AIResearchAssistant />
-        <AIFactChecker />
-        <AIHeadlineOptimizer />
-        <AutoTranslator />
-        <VoiceToArticle />
-        <PhotoSelector />
-        <BreakingNewsTicker />
-        <PressRewriter />
-        <SchedulingAssistant />
-        <EarningsDashboard />
-        <MediaEditor />
-        <ContentCalendar />
-        <AnalyticsPanel />
-        <CollaborationRoom />
-        <TipInbox />
-      </div>
-
-      <div className="fixed bottom-6 right-6 space-y-3 z-50">
-        <Button className="rounded-full shadow-lg" size="icon">
-          📝
-        </Button>
-        <Button className="rounded-full shadow-lg" size="icon">
-          🧠
-        </Button>
-        <Button className="rounded-full shadow-lg" size="icon">
-          📰
-        </Button>
-        <Button className="rounded-full shadow-lg" size="icon">
-          🎙️
-        </Button>
-        <Button className="rounded-full shadow-lg" size="icon">
-          📅
-        </Button>
+      <div className="flex h-full">
+        <aside className="w-64 bg-gray-900 text-white p-4 space-y-3">
+          <h2 className="text-xl font-semibold mb-4">Tools</h2>
+          {tools.map(tool => (
+            <button
+              key={tool.name}
+              onClick={() => setSelectedTool(tool)}
+              className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
+            >
+              {tool.name}
+            </button>
+          ))}
+        </aside>
+        <main className="flex-1 p-6 overflow-y-auto">
+          <h1 className="text-2xl font-bold text-blue-700 mb-4">{selectedTool.name}</h1>
+          <div className="bg-white rounded shadow p-4">
+            {selectedTool.component}
+          </div>
+        </main>
       </div>
     </DashboardLayout>
   )
