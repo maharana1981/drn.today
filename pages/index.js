@@ -17,6 +17,7 @@ export default function PublicHome() {
   const [loadingMore, setLoadingMore] = useState(false)
   const [darkMode, setDarkMode] = useState(false)
   const [bookmarks, setBookmarks] = useState([])
+  const [commentInputs, setCommentInputs] = useState({})
   const observerRef = useRef()
   const POSTS_PER_PAGE = 6
 
@@ -79,6 +80,19 @@ export default function PublicHome() {
     localStorage.setItem('bookmarkedPosts', JSON.stringify(updated))
   }
 
+  const handleCommentChange = (postId, text) => {
+    setCommentInputs(prev => ({ ...prev, [postId]: text }))
+  }
+
+  const submitComment = async (postId) => {
+    const content = commentInputs[postId]?.trim()
+    if (!content) return
+
+    await supabase.from('comments').insert({ post_id: postId, content })
+    alert('Comment submitted!')
+    setCommentInputs(prev => ({ ...prev, [postId]: '' }))
+  }
+
   const filteredPosts = posts.filter(post => {
     const matchCategory = activeCategory === 'all' || post.category?.toLowerCase() === activeCategory
     const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
@@ -88,7 +102,7 @@ export default function PublicHome() {
 
   const translate = (text) => {
     const lang = navigator.language || 'en'
-    return lang.startsWith('en') ? text : text // Real translation logic/API can be inserted here
+    return lang.startsWith('en') ? text : text
   }
 
   const toggleTheme = () => setDarkMode(!darkMode)
@@ -201,6 +215,21 @@ export default function PublicHome() {
                   title="Hover to expand full summary"
                 >
                   {translate(post.summary)}
+                </div>
+                <div className="mt-4">
+                  <input
+                    type="text"
+                    value={commentInputs[post.id] || ''}
+                    onChange={(e) => handleCommentChange(post.id, e.target.value)}
+                    placeholder="Write a comment..."
+                    className="w-full px-3 py-2 text-sm rounded border mt-2 text-black"
+                  />
+                  <button
+                    onClick={() => submitComment(post.id)}
+                    className="mt-2 text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                  >
+                    Submit Comment
+                  </button>
                 </div>
               </CardContent>
             </Card>

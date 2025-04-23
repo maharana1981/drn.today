@@ -8,7 +8,11 @@ export default function PostPage() {
   const router = useRouter()
   const { slug } = router.query
   const [post, setPost] = useState(null)
+  const [comments, setComments] = useState([])
+  const [newComment, setNewComment] = useState('')
+  const [loading, setLoading] = useState(false)
 
+  // Fetch post
   useEffect(() => {
     if (slug) {
       const fetchPost = async () => {
@@ -21,6 +25,51 @@ export default function PostPage() {
       fetchPost()
     }
   }, [slug])
+
+  // Fetch comments
+  useEffect(() => {
+    if (!slug) return
+    const fetchComments = async () => {
+      const { data } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('slug', slug)
+        .order('created_at', { ascending: false })
+      if (data) setComments(data)
+    }
+    fetchComments()
+
+    // Realtime subscription
+    const channel = supabase
+      .channel('realtime-comments')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, (payload) => {
+        if (payload.new.slug === slug) {
+          setComments((prev) => [payload.new, ...prev])
+        }
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [slug])
+
+  // Handle submit
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault()
+    if (!newComment.trim() || !post?.id) return
+
+    setLoading(true)
+    await supabase.from('comments').insert({
+      post_id: post.id,
+      slug,
+      content: newComment,
+      author_name: 'Anonymous',
+      is_verified: false,
+    })
+    setNewComment('')
+    setLoading(false)
+  }
 
   if (!post) return <div className="p-8 text-white text-center">Loading...</div>
 
@@ -40,6 +89,40 @@ export default function PostPage() {
           <video src={post.video_url} controls className="w-full rounded" />
         </div>
       )}
+
+      {/* Comment input */}
+      <section className="mt-10">
+        <h2 className="text-xl font-bold mb-2">Leave a Comment</h2>
+        <form onSubmit={handleCommentSubmit} className="mb-6">
+          <textarea
+            value={newComment}
+            onChange={(e) => setNewComment(e.target.value)}
+            placeholder="Write your comment..."
+            className="w-full p-3 rounded bg-gray-800 text-white border border-gray-600"
+            rows={3}
+          />
+          <button
+            type="submit"
+            className="mt-2 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            disabled={loading || !newComment.trim()}
+          >
+            {loading ? 'Posting...' : 'Post Comment'}
+          </button>
+        </form>
+
+        {/* Comments list */}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Comments</h3>
+          {comments.length === 0 && <p className="text-gray-400">No comments yet.</p>}
+          {comments.map((c) => (
+            <div key={c.id} className="mb-4 border-b border-gray-700 pb-2">
+              <p className="text-sm text-blue-400 font-semibold">{c.author_name || 'Anonymous'}</p>
+              <p className="text-gray-300 text-sm mt-1 whitespace-pre-wrap">{c.content}</p>
+              <p className="text-gray-500 text-xs mt-1">{new Date(c.created_at).toLocaleString()}</p>
+            </div>
+          ))}
+        </div>
+      </section>
     </main>
   )
 }
