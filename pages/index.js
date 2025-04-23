@@ -54,7 +54,7 @@ export default function PublicHome() {
         <button onClick={() => setSortMode('trending')} className={`px-4 py-2 rounded ${sortMode === 'trending' ? 'bg-white text-black' : 'bg-gray-800 text-white'}`}>🔥 Trending</button>
       </div>
 
-      <div className="mb-6 flex flex-wrap justify-center gap-2">
+      <div className="mb-4 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
         {[
           { label: 'All', value: 'all' },
           { label: 'Trending', value: 'trending' },
@@ -81,19 +81,19 @@ export default function PublicHome() {
           <Badge
             key={value}
             onClick={() => setActiveCategory(value)}
-            className={`cursor-pointer border-white px-3 py-1 ${activeCategory === value ? 'bg-white text-black' : 'text-white'}`}
+            className={`cursor-pointer border-white px-3 py-1 mx-1 inline-block ${activeCategory === value ? 'bg-white text-black' : 'text-white'}`}
           >
             {label}
           </Badge>
         ))}
       </div>
 
-      <div className="mb-6 flex flex-wrap justify-center gap-2">
+      <div className="mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide">
         {locations.map((loc) => (
           <Badge
             key={loc}
             onClick={() => setActiveLocation(loc)}
-            className={`cursor-pointer border-white px-3 py-1 capitalize ${activeLocation === loc ? 'bg-white text-black' : 'text-white'}`}
+            className={`cursor-pointer border-white px-3 py-1 mx-1 inline-block capitalize ${activeLocation === loc ? 'bg-white text-black' : 'text-white'}`}
           >
             {loc}
           </Badge>
