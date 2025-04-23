@@ -45,7 +45,7 @@ export default function PublicHome() {
       {breakingNews.length > 0 && (
         <div className="bg-red-600 text-white py-2 px-4 rounded mb-4 overflow-hidden whitespace-nowrap animate-marquee">
           <span className="font-bold mr-4">🚨 Breaking:</span>
-          {breakingNews.map((post, i) => (
+          {breakingNews.map((post) => (
             <span key={post.id} className="mx-4">
               <Link href={`/post/${post.slug}`} className="hover:underline">
                 {post.title}
@@ -133,6 +133,20 @@ export default function PublicHome() {
             transition={{ duration: 0.3 }}
           >
             <Card className="bg-slate-900 hover:shadow-lg hover:shadow-blue-500/30 transition-all">
+              {post.thumbnail_url && (
+                <img
+                  src={post.thumbnail_url}
+                  alt={post.title}
+                  className="w-full h-40 object-cover rounded-t"
+                />
+              )}
+              {!post.thumbnail_url && post.video_url && (
+                <video
+                  src={post.video_url}
+                  controls
+                  className="w-full h-40 object-cover rounded-t"
+                />
+              )}
               <CardContent className="p-4">
                 <Link href={`/post/${post.slug}`}>
                   <h2 className="text-xl font-semibold text-blue-300 hover:underline">{post.title}</h2>
