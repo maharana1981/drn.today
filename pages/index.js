@@ -10,10 +10,11 @@ export default function PublicHome() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [activeLocation, setActiveLocation] = useState('all')
   const [search, setSearch] = useState('')
+  const [sortMode, setSortMode] = useState('latest')
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const { data } = await supabase.from('posts').select('*').order('created_at', { ascending: false })
+      const { data } = await supabase.from('posts').select('*')
       if (data) setPosts(data)
     }
     fetchPosts()
@@ -24,6 +25,12 @@ export default function PublicHome() {
     const matchLocation = activeLocation === 'all' || post.location?.toLowerCase().includes(activeLocation)
     const matchSearch = post.title?.toLowerCase().includes(search.toLowerCase()) || post.summary?.toLowerCase().includes(search.toLowerCase())
     return matchCategory && matchLocation && matchSearch
+  })
+
+  const sortedPosts = [...filteredPosts].sort((a, b) => {
+    return sortMode === 'trending'
+      ? (b.views || 0) - (a.views || 0)
+      : new Date(b.created_at) - new Date(a.created_at)
   })
 
   const locations = ['all', 'new york', 'london', 'delhi', 'tokyo', 'global']
@@ -40,6 +47,11 @@ export default function PublicHome() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full max-w-xl px-4 py-2 rounded text-black"
         />
+      </div>
+
+      <div className="flex justify-center gap-4 mb-6">
+        <button onClick={() => setSortMode('latest')} className={`px-4 py-2 rounded ${sortMode === 'latest' ? 'bg-white text-black' : 'bg-gray-800 text-white'}`}>🕒 Latest</button>
+        <button onClick={() => setSortMode('trending')} className={`px-4 py-2 rounded ${sortMode === 'trending' ? 'bg-white text-black' : 'bg-gray-800 text-white'}`}>🔥 Trending</button>
       </div>
 
       <div className="mb-6 flex flex-wrap justify-center gap-2">
@@ -88,12 +100,12 @@ export default function PublicHome() {
         ))}
       </div>
 
-      {filteredPosts.length === 0 && (
+      {sortedPosts.length === 0 && (
         <p className="text-center text-gray-400">No posts available.</p>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredPosts.map((post) => (
+        {sortedPosts.map((post) => (
           <motion.div
             key={post.id}
             initial={{ opacity: 0, scale: 0.9 }}
@@ -106,6 +118,7 @@ export default function PublicHome() {
                   <h2 className="text-xl font-semibold text-blue-300 hover:underline">{post.title}</h2>
                 </Link>
                 <p className="text-sm text-gray-400 mt-1">{post.location} · {post.category}</p>
+                <p className="text-sm text-gray-500">👁️ {post.views || 0} views</p>
                 <p className="text-gray-200 text-sm mt-2 line-clamp-3">{post.summary}</p>
               </CardContent>
             </Card>
