@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import TopStories from '@/components/TopStories'
 
 export default function PublicHome() {
   const [posts, setPosts] = useState([])
@@ -116,6 +117,8 @@ export default function PublicHome() {
           </Badge>
         ))}
       </div>
+
+      <TopStories />
 
       {sortedPosts.length === 0 && (
         <p className="text-center text-gray-400">No posts available.</p>
