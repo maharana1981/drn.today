@@ -16,29 +16,29 @@ import AnalyticsPanel from '@/components/AnalyticsPanel'
 import CollaborationRoom from '@/components/CollaborationRoom'
 import TipInbox from '@/components/TipInbox'
 
-
 export default function Newsroom() {
   return (
     <DashboardLayout>
-      <h1 className='text-2xl font-bold text-blue-700 mb-6'>DRN.today Newsroom</h1>
+      <h1 className='text-3xl font-bold text-blue-600 mb-6 tracking-wide'>🧠 DRN.today Newsroom Dashboard</h1>
 
-      <SmartComposer />
-      <AIResearchAssistant />
-      <AIFactChecker />
-      <AIHeadlineOptimizer />
-      <AutoTranslator />
-      <VoiceToArticle />
-      <PhotoSelector />
-      <BreakingNewsTicker />
-      <PressRewriter />
-      <SchedulingAssistant />
-      <EarningsDashboard />
-      <MediaEditor />
-      <ContentCalendar />
-      <AnalyticsPanel />
-      <CollaborationRoom />
-      <TipInbox />
-
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SmartComposer />
+        <AIResearchAssistant />
+        <AIFactChecker />
+        <AIHeadlineOptimizer />
+        <AutoTranslator />
+        <VoiceToArticle />
+        <PhotoSelector />
+        <BreakingNewsTicker />
+        <PressRewriter />
+        <SchedulingAssistant />
+        <EarningsDashboard />
+        <MediaEditor />
+        <ContentCalendar />
+        <AnalyticsPanel />
+        <CollaborationRoom />
+        <TipInbox />
+      </div>
     </DashboardLayout>
   )
 }
