@@ -275,6 +275,7 @@ export default function PublicHome() {
                     onClick={() => submitComment(post.id)}
                     className="mt-2 text-sm bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
                   >
+                    
                     Submit Comment
                   </button>
                 </div>
