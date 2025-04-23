@@ -80,6 +80,25 @@ export default function PublicHome() {
     localStorage.setItem('bookmarkedPosts', JSON.stringify(updated))
   }
 
+  const handleReaction = async (postId, type) => {
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+      alert('Please login to react')
+      return
+    }
+
+    await supabase.from('reactions').upsert({
+      post_id: postId,
+      type,
+      user_id: user.id
+    }, {
+      onConflict: 'post_id, user_id, type'
+    })
+
+    alert(type === 'like' ? 'Liked!' : type === 'dislike' ? 'Disliked!' : 'Saved!')
+  }
+
   const handleCommentChange = (postId, text) => {
     setCommentInputs(prev => ({ ...prev, [postId]: text }))
   }
@@ -206,7 +225,11 @@ export default function PublicHome() {
                   </button>
                 </div>
                 <p className="text-sm text-gray-500 mt-1">{post.location} · {post.category}</p>
-                <p className="text-sm text-gray-600">👁️ {post.views || 0} views · ❤️ {post.reactions || 0} likes · 🔁 {post.shares || 0} shares</p>
+                <div className="flex gap-4 text-sm text-gray-600 mt-1">
+                  <button onClick={() => handleReaction(post.id, 'like')}>❤️ Like</button>
+                  <button onClick={() => handleReaction(post.id, 'dislike')}>👎 Dislike</button>
+                  <button onClick={() => toggleBookmark(post.id)}>{bookmarks.includes(post.id) ? '🔖 Saved' : '➕ Save'}</button>
+                </div>
                 <div className="text-xs text-green-600 mt-1">
                   {post.views > 1000 && '#trending'} {post.exclusive && '#exclusive'}
                 </div>
