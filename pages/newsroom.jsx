@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
-import { useRouter } from 'next/router'
 
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
