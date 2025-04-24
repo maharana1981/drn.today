@@ -1,7 +1,3 @@
-const [mediaFiles, setMediaFiles] = useState([])
-const [mediaUrls, setMediaUrls] = useState([])
-const [uploading, setUploading] = useState(false)
-
 const handleMediaUpload = async (file) => {
   if (!file) return
   setUploading(true)
@@ -47,6 +43,9 @@ const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
 
 export default function SmartComposer() {
+  const [mediaFiles, setMediaFiles] = useState([])
+  const [mediaUrls, setMediaUrls] = useState([])
+  const [uploading, setUploading] = useState(false)
   const [title, setTitle] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
