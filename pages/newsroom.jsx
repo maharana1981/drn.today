@@ -42,56 +42,41 @@ export default function Newsroom() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col h-screen">
-        {/* Top Horizontal Header */}
-        <div className="flex justify-between items-center px-6 py-3 bg-white border-b shadow">
-          <h1 className="text-2xl font-bold text-blue-700">DRN Newsroom</h1>
-          <nav className="flex space-x-6 text-sm font-medium">
-            <button className="hover:underline">Home</button>
-            <button className="hover:underline">Posts</button>
-            <button className="hover:underline">Earnings</button>
-            <button className="hover:underline">Notifications</button>
-            <button className="hover:underline">Settings</button>
-          </nav>
-        </div>
-
-        {/* Main Body */}
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar with Tools */}
-          <aside className="w-64 bg-gray-900 text-white p-4 overflow-y-auto">
-            <div className="flex items-center space-x-3 mb-6">
-              <Image
-                src="https://via.placeholder.com/40"
-                alt="Profile"
-                width={40}
-                height={40}
-                className="rounded-full"
-              />
-              <div>
-                <p className="text-sm">Welcome,</p>
-                <p className="font-semibold">Journalist</p>
-              </div>
+      <div className="flex w-full">
+        {/* Sidebar with Tools */}
+        <aside className="w-64 bg-gray-900 text-white p-4 overflow-y-auto">
+          <div className="flex items-center space-x-3 mb-6">
+            <Image
+              src="https://via.placeholder.com/40"
+              alt="Profile"
+              width={60}
+              height={60}
+              className="rounded-full"
+            />
+            <div>
+              <p className="text-sm">Welcome,</p>
+              <p className="font-semibold">Journalist</p>
             </div>
-            <h2 className="text-lg font-semibold mb-4">Tools</h2>
-            {tools.map(tool => (
-              <button
-                key={tool.name}
-                onClick={() => setSelectedTool(tool)}
-                className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
-              >
-                {tool.name}
-              </button>
-            ))}
-          </aside>
+          </div>
+          <h2 className="text-lg font-semibold mb-4">Tools</h2>
+          {tools.map(tool => (
+            <button
+              key={tool.name}
+              onClick={() => setSelectedTool(tool)}
+              className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
+            >
+              {tool.name}
+            </button>
+          ))}
+        </aside>
 
-          {/* Selected Tool Display */}
-          <main className="flex-1 p-6 overflow-y-auto">
-            <h1 className="text-2xl font-bold text-blue-700 mb-4">{selectedTool.name}</h1>
-            <div className="bg-white rounded shadow p-4">
-              {selectedTool.component}
-            </div>
-          </main>
-        </div>
+        {/* Selected Tool Display */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          <h1 className="text-2xl font-bold text-blue-700 mb-4">{selectedTool.name}</h1>
+          <div className="bg-white rounded shadow p-4">
+            {selectedTool.component}
+          </div>
+        </main>
       </div>
     </DashboardLayout>
   )

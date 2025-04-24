@@ -1,17 +1,23 @@
-import DashboardSidebar from "@/components/DashboardSidebar";
-
 export default function DashboardLayout({ children }) {
   return (
-    <div className="flex min-h-screen">
-      <DashboardSidebar />
-      <main className="flex-1 bg-slate-50 p-6 overflow-y-auto">
-        {/* 🚧 Dev Mode Banner */}
-        <div className="bg-yellow-200 text-yellow-800 px-4 py-2 rounded-lg mb-4 font-semibold shadow">
-          ⚠️ Development Mode: Auth is temporarily disabled
-        </div>
-        {children}
-      </main>
-    </div>
-  );
-}
+    <div className="min-h-screen flex flex-col">
+      {/* 🧭 Top Header */}
+      <header className="w-full bg-white border-b px-6 py-3 flex justify-between items-center shadow-sm">
+        <h1 className="text-lg font-bold text-blue-700">DRN Newsroom</h1>
+        <nav className="space-x-6 text-sm font-medium text-gray-600">
+          <a href="#" className="hover:text-blue-600">Home</a>
+          <a href="#" className="hover:text-blue-600">Posts</a>
+          <a href="#" className="hover:text-blue-600">Earnings</a>
+          <a href="#" className="hover:text-blue-600">Notifications</a>
+          <a href="#" className="hover:text-blue-600">Settings</a>
+        </nav>
+      </header>
 
+      {/* 🖥️ Content Area */}
+      <div className="flex flex-1">
+        {/* Sidebar will come from the page layout */}
+        {children}
+      </div>
+    </div>
+  )
+}
