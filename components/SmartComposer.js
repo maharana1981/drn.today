@@ -22,7 +22,6 @@ import { Select } from '@/components/ui/select'
   ))}
 </Select>
 
-
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
 
@@ -123,16 +122,25 @@ export default function SmartComposer() {
       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter headline" />
 
       <Label>Category</Label>
-      <Select value={category} onValueChange={setCategory}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Select category" />
-        </SelectTrigger>
-        <SelectContent>
-          {["world","politics","business","finance","technology","sports","entertainment","gaming","education","health","environment","weather","law-crime","innovation","culture-society","travel","religion","india","city-updates"].map(cat => (
-            <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+<div className="relative">
+  <select
+    className="w-full px-3 py-2 border border-gray-300 rounded"
+    value={category}
+    onChange={(e) => setCategory(e.target.value)}
+  >
+    <option value="" disabled>Select category</option>
+    {[
+      'world', 'politics', 'business', 'finance', 'technology',
+      'sports', 'entertainment', 'gaming', 'education', 'health',
+      'environment', 'weather', 'law-crime', 'innovation',
+      'culture-society', 'travel', 'religion', 'india', 'city-updates'
+    ].map(cat => (
+      <option key={cat} value={cat}>
+        {cat}
+      </option>
+    ))}
+  </select>
+</div>
 
       <Label>Location</Label>
       <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter location (e.g. New York, India...)" />
