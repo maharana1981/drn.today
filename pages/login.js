@@ -64,7 +64,7 @@ export default function Login() {
         transition={{ duration: 0.5 }}
         className="text-3xl font-bold mb-8 text-blue-700"
       >
-        DRN.today Login
+        Login / Signup – DRN.today
       </motion.h1>
 
       <motion.div

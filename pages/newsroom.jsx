@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
 import { supabase } from '@/lib/supabase'
+import { Button } from '@/components/ui/button'
+import { useRouter } from 'next/router'
 
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
@@ -124,6 +126,16 @@ export default function Newsroom() {
       <div className="flex flex-col md:flex-row w-full">
         <aside className="md:w-72 w-full bg-gray-900 text-white p-4 overflow-y-auto">
           <div className="flex items-center space-x-3 mb-6">
+          <Button
+  onClick={async () => {
+    await supabase.auth.signOut()
+    router.push('/login')
+  }}
+  className="w-full bg-red-600 hover:bg-red-700 mt-4"
+>
+  Sign Out
+</Button>
+
             <Image
               src="https://via.placeholder.com/40"
               alt="Profile"
