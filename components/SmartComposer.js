@@ -6,24 +6,9 @@ import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import dynamic from 'next/dynamic'
 import { format } from 'date-fns'
-import { Select } from '@/components/ui/select'
-
-<Select value={category} onValueChange={setCategory}>
-  <option value="" disabled>Select category</option>
-  {[
-    'world', 'politics', 'business', 'finance', 'technology',
-    'sports', 'entertainment', 'gaming', 'education', 'health',
-    'environment', 'weather', 'law-crime', 'innovation',
-    'culture-society', 'travel', 'religion', 'india', 'city-updates'
-  ].map(cat => (
-    <option key={cat} value={cat}>
-      {cat}
-    </option>
-  ))}
-</Select>
+import 'react-quill/dist/quill.snow.css'
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
-import 'react-quill/dist/quill.snow.css'
 
 export default function SmartComposer() {
   const [title, setTitle] = useState('')
@@ -122,25 +107,18 @@ export default function SmartComposer() {
       <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Enter headline" />
 
       <Label>Category</Label>
-<div className="relative">
-  <select
-    className="w-full px-3 py-2 border border-gray-300 rounded"
-    value={category}
-    onChange={(e) => setCategory(e.target.value)}
-  >
-    <option value="" disabled>Select category</option>
-    {[
-      'world', 'politics', 'business', 'finance', 'technology',
-      'sports', 'entertainment', 'gaming', 'education', 'health',
-      'environment', 'weather', 'law-crime', 'innovation',
-      'culture-society', 'travel', 'religion', 'india', 'city-updates'
-    ].map(cat => (
-      <option key={cat} value={cat}>
-        {cat}
-      </option>
-    ))}
-  </select>
-</div>
+      <div className="relative">
+        <select
+          className="w-full px-3 py-2 border border-gray-300 rounded"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        >
+          <option value="" disabled>Select category</option>
+          {["world", "politics", "business", "finance", "technology", "sports", "entertainment", "gaming", "education", "health", "environment", "weather", "law-crime", "innovation", "culture-society", "travel", "religion", "india", "city-updates"].map(cat => (
+            <option key={cat} value={cat}>{cat}</option>
+          ))}
+        </select>
+      </div>
 
       <Label>Location</Label>
       <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Enter location (e.g. New York, India...)" />
