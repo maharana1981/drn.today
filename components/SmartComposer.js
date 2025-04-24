@@ -81,7 +81,6 @@ export default function SmartComposer() {
       location,
       scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
       media_url: mediaUrl,
-      user_id: user.id,
     })
 
     setLoading(false)
