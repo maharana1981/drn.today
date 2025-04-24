@@ -75,11 +75,19 @@ const groupedTools = [
 
 export default function Newsroom() {
   const [selectedTool, setSelectedTool] = useState(groupedTools[0].tools[0])
+  const [searchQuery, setSearchQuery] = useState('')
+
+  const filteredTools = groupedTools.map(group => ({
+    ...group,
+    tools: group.tools.filter(tool =>
+      tool.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(group => group.tools.length > 0)
 
   return (
     <DashboardLayout>
-      <div className="flex w-full">
-        <aside className="w-72 bg-gray-900 text-white p-4 overflow-y-auto">
+      <div className="flex flex-col md:flex-row w-full">
+        <aside className="md:w-72 w-full bg-gray-900 text-white p-4 overflow-y-auto">
           <div className="flex items-center space-x-3 mb-6">
             <Image
               src="https://via.placeholder.com/40"
@@ -93,20 +101,31 @@ export default function Newsroom() {
               <p className="font-semibold">Journalist</p>
             </div>
           </div>
-          {groupedTools.map(group => (
-            <div key={group.category} className="mb-6">
-              <h3 className="text-md font-semibold text-gray-300 mb-2">{group.category}</h3>
-              {group.tools.map(tool => (
-                <button
-                  key={tool.name}
-                  onClick={() => setSelectedTool(tool)}
-                  className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
-                >
-                  {tool.name}
-                </button>
-              ))}
-            </div>
-          ))}
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search tools..."
+            className="w-full px-3 py-2 mb-4 text-sm rounded bg-gray-800 border border-gray-700 placeholder-gray-400"
+          />
+          {filteredTools.length === 0 ? (
+            <p className="text-gray-400 text-sm">🔍 No tools found</p>
+          ) : (
+            filteredTools.map(group => (
+              <div key={group.category} className="mb-6">
+                <h3 className="text-md font-semibold text-gray-300 mb-2">{group.category}</h3>
+                {group.tools.map(tool => (
+                  <button
+                    key={tool.name}
+                    onClick={() => setSelectedTool(tool)}
+                    className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
+                  >
+                    {tool.name}
+                  </button>
+                ))}
+              </div>
+            ))
+          )}
         </aside>
 
         <main className="flex-1 p-6 overflow-y-auto">
