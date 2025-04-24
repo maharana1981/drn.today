@@ -12,7 +12,6 @@ export default function AIFactChecker() {
     setChecking(true)
     setResult(null)
 
-    // Simulate AI fact-check logic (replace with actual API call later)
     setTimeout(() => {
       setResult({
         status: 'warning',

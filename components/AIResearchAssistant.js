@@ -5,10 +5,18 @@ import { useState } from "react"
 
 export default function AIResearchAssistant() {
   const [query, setQuery] = useState("")
+  const [result, setResult] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  const handleResearch = () => {
+  const handleResearch = async () => {
     if (!query.trim()) return alert("Enter a topic")
-    alert("Researching: " + query)
+    setLoading(true)
+
+    // Simulate AI research response
+    setTimeout(() => {
+      setResult(`Top insights for "${query}":\n\n1. Insight one with facts.\n2. Insight two with analysis.\n3. Relevant stats and historical context.`)
+      setLoading(false)
+    }, 1000)
   }
 
   return (
@@ -20,7 +28,14 @@ export default function AIResearchAssistant() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
-        <Button onClick={handleResearch}>Get Insights</Button>
+        <Button onClick={handleResearch} disabled={loading}>
+          {loading ? "Fetching..." : "Get Insights"}
+        </Button>
+        {result && (
+          <div className="bg-gray-100 p-3 rounded text-sm whitespace-pre-line">
+            {result}
+          </div>
+        )}
       </CardContent>
     </Card>
   )
