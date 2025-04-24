@@ -73,6 +73,10 @@ export default function SmartComposer() {
       media_url: mediaUrl || null,
       created_at: new Date().toISOString()
     })
+    if (error) {
+      console.error('Insert error:', error) // 🔍 Add this line
+    }
+    
 
     setLoading(false)
     if (!error) {
