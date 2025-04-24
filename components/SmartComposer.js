@@ -6,9 +6,9 @@ import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import dynamic from 'next/dynamic'
 import { format } from 'date-fns'
-import 'react-quill/dist/quill.snow.css'
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
+import 'react-quill/dist/quill.snow.css'
 
 export default function SmartComposer() {
   const [title, setTitle] = useState('')
@@ -61,7 +61,7 @@ export default function SmartComposer() {
         return
       }
       const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(filePath)
-      mediaUrl = publicUrlData.publicUrl
+      mediaUrl = publicUrlData?.publicUrl
     }
 
     const { error } = await supabase.from('posts').insert({
@@ -70,7 +70,8 @@ export default function SmartComposer() {
       category,
       location,
       scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-      media_url: mediaUrl,
+      media_url: mediaUrl || null,
+      created_at: new Date().toISOString()
     })
 
     setLoading(false)
@@ -85,6 +86,7 @@ export default function SmartComposer() {
       alert('✅ Post submitted!')
     } else {
       setStatus('failed')
+      console.error('Supabase insert error:', error)
       alert('❌ Error submitting post!')
     }
   }
@@ -114,7 +116,7 @@ export default function SmartComposer() {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="" disabled>Select category</option>
-          {["world", "politics", "business", "finance", "technology", "sports", "entertainment", "gaming", "education", "health", "environment", "weather", "law-crime", "innovation", "culture-society", "travel", "religion", "india", "city-updates"].map(cat => (
+          {[ 'world', 'politics', 'business', 'finance', 'technology', 'sports', 'entertainment', 'gaming', 'education', 'health', 'environment', 'weather', 'law-crime', 'innovation', 'culture-society', 'travel', 'religion', 'india', 'city-updates' ].map(cat => (
             <option key={cat} value={cat}>{cat}</option>
           ))}
         </select>
