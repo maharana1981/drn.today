@@ -64,20 +64,20 @@ export default function SmartComposer() {
       mediaUrl = publicUrlData?.publicUrl
     }
 
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    
     const { error } = await supabase.from('posts').insert({
       title,
       content,
       category,
       location,
       scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-      media_url: mediaUrl || null,
-      created_at: new Date().toISOString()
-    })
-    if (error) {
-      console.error('Insert error:', error) // 🔍 Add this line
-    }
+      media_url: mediaUrl,
+      user_id: user.id, // ✅ This line is required
+    })    
     
-
     setLoading(false)
     if (!error) {
       setTitle('')
