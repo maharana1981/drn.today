@@ -2,11 +2,26 @@ import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
 import dynamic from 'next/dynamic'
 import { format } from 'date-fns'
+import { Select } from '@/components/ui/select'
+
+<Select value={category} onValueChange={setCategory}>
+  <option value="" disabled>Select category</option>
+  {[
+    'world', 'politics', 'business', 'finance', 'technology',
+    'sports', 'entertainment', 'gaming', 'education', 'health',
+    'environment', 'weather', 'law-crime', 'innovation',
+    'culture-society', 'travel', 'religion', 'india', 'city-updates'
+  ].map(cat => (
+    <option key={cat} value={cat}>
+      {cat}
+    </option>
+  ))}
+</Select>
+
 
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
