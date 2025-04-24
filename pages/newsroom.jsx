@@ -70,6 +70,12 @@ const groupedTools = [
       { name: 'Press Outreach Assistant', component: <OutreachAssistant /> },
       { name: 'Archive Search Tool', component: <ArchiveSearch /> }
     ]
+  },
+  {
+    category: 'Productivity Tools',
+    tools: [
+      { name: 'Task Manager', component: <TaskManager /> }
+    ]
   }
 ]
 
