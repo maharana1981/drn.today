@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { supabase } from '@/lib/supabase'
 import { Badge } from '@/components/ui/badge'
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import dynamic from 'next/dynamic'
 import { format } from 'date-fns'
 
@@ -64,17 +65,15 @@ export default function SmartComposer() {
       mediaUrl = publicUrlData?.publicUrl
     }
 
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser()
+    const supabaseClient = createClientComponentClient()
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
     
     if (userError || !user) {
       alert('❌ Failed to fetch user. Please login again.')
       setLoading(false)
       return
-    }    
-    
+    }
+
     const { error } = await supabase.from('posts').insert({
       title,
       content,
@@ -82,9 +81,9 @@ export default function SmartComposer() {
       location,
       scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
       media_url: mediaUrl,
-      user_id: user.id, // ✅ This line is required
-    })    
-    
+      user_id: user.id,
+    })
+
     setLoading(false)
     if (!error) {
       setTitle('')
