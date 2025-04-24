@@ -66,7 +66,14 @@ export default function SmartComposer() {
 
     const {
       data: { user },
+      error: userError,
     } = await supabase.auth.getUser()
+    
+    if (userError || !user) {
+      alert('❌ Failed to fetch user. Please login again.')
+      setLoading(false)
+      return
+    }    
     
     const { error } = await supabase.from('posts').insert({
       title,
