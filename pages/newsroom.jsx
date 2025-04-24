@@ -15,42 +15,77 @@ import ContentCalendar from '@/components/ContentCalendar'
 import AnalyticsPanel from '@/components/AnalyticsPanel'
 import CollaborationRoom from '@/components/CollaborationRoom'
 import TipInbox from '@/components/TipInbox'
+import QuoteExtractor from '@/components/QuoteExtractor'
+import TimelineGenerator from '@/components/TimelineGenerator'
+import HashtagRecommender from '@/components/HashtagRecommender'
+import ArchiveSearch from '@/components/ArchiveSearch'
+import InterviewScheduler from '@/components/InterviewScheduler'
+import SentimentScanner from '@/components/SentimentScanner'
+import FactUpdateTracker from '@/components/FactUpdateTracker'
+import OutreachAssistant from '@/components/OutreachAssistant'
 import { useState } from 'react'
 import Image from 'next/image'
 
-const tools = [
-  { name: 'Smart Composer', component: <SmartComposer /> },
-  { name: 'Research Assistant', component: <AIResearchAssistant /> },
-  { name: 'Fact Checker', component: <AIFactChecker /> },
-  { name: 'Headline Optimizer', component: <AIHeadlineOptimizer /> },
-  { name: 'Auto Translator', component: <AutoTranslator /> },
-  { name: 'Voice to Article', component: <VoiceToArticle /> },
-  { name: 'Photo Selector', component: <PhotoSelector /> },
-  { name: 'Breaking News Ticker', component: <BreakingNewsTicker /> },
-  { name: 'Press Rewriter', component: <PressRewriter /> },
-  { name: 'Scheduling Assistant', component: <SchedulingAssistant /> },
-  { name: 'Earnings Dashboard', component: <EarningsDashboard /> },
-  { name: 'Media Editor', component: <MediaEditor /> },
-  { name: 'Content Calendar', component: <ContentCalendar /> },
-  { name: 'Analytics Panel', component: <AnalyticsPanel /> },
-  { name: 'Collaboration Room', component: <CollaborationRoom /> },
-  { name: 'Tip Inbox', component: <TipInbox /> },
+const groupedTools = [
+  {
+    category: 'Content Creation',
+    tools: [
+      { name: 'Smart Composer', component: <SmartComposer /> },
+      { name: 'Research Assistant', component: <AIResearchAssistant /> },
+      { name: 'Fact Checker', component: <AIFactChecker /> },
+      { name: 'Headline Optimizer', component: <AIHeadlineOptimizer /> },
+      { name: 'Press Rewriter', component: <PressRewriter /> },
+      { name: 'Quote Extractor', component: <QuoteExtractor /> },
+      { name: 'Timeline Generator', component: <TimelineGenerator /> },
+      { name: 'Hashtag Recommender', component: <HashtagRecommender /> }
+    ]
+  },
+  {
+    category: 'Media & Translation',
+    tools: [
+      { name: 'Auto Translator', component: <AutoTranslator /> },
+      { name: 'Voice to Article', component: <VoiceToArticle /> },
+      { name: 'Photo Selector', component: <PhotoSelector /> },
+      { name: 'Media Editor', component: <MediaEditor /> }
+    ]
+  },
+  {
+    category: 'Scheduling & Monitoring',
+    tools: [
+      { name: 'Breaking News Ticker', component: <BreakingNewsTicker /> },
+      { name: 'Scheduling Assistant', component: <SchedulingAssistant /> },
+      { name: 'Interview Scheduler', component: <InterviewScheduler /> },
+      { name: 'Fact Update Tracker', component: <FactUpdateTracker /> }
+    ]
+  },
+  {
+    category: 'Insights & Engagement',
+    tools: [
+      { name: 'Earnings Dashboard', component: <EarningsDashboard /> },
+      { name: 'Content Calendar', component: <ContentCalendar /> },
+      { name: 'Analytics Panel', component: <AnalyticsPanel /> },
+      { name: 'Collaboration Room', component: <CollaborationRoom /> },
+      { name: 'Tip Inbox', component: <TipInbox /> },
+      { name: 'Public Sentiment Scanner', component: <SentimentScanner /> },
+      { name: 'Press Outreach Assistant', component: <OutreachAssistant /> },
+      { name: 'Archive Search Tool', component: <ArchiveSearch /> }
+    ]
+  }
 ]
 
 export default function Newsroom() {
-  const [selectedTool, setSelectedTool] = useState(tools[0])
+  const [selectedTool, setSelectedTool] = useState(groupedTools[0].tools[0])
 
   return (
     <DashboardLayout>
       <div className="flex w-full">
-        {/* Sidebar with Tools */}
-        <aside className="w-64 bg-gray-900 text-white p-4 overflow-y-auto">
+        <aside className="w-72 bg-gray-900 text-white p-4 overflow-y-auto">
           <div className="flex items-center space-x-3 mb-6">
             <Image
               src="https://via.placeholder.com/40"
               alt="Profile"
-              width={60}
-              height={60}
+              width={40}
+              height={40}
               className="rounded-full"
             />
             <div>
@@ -58,19 +93,22 @@ export default function Newsroom() {
               <p className="font-semibold">Journalist</p>
             </div>
           </div>
-          <h2 className="text-lg font-semibold mb-4">Tools</h2>
-          {tools.map(tool => (
-            <button
-              key={tool.name}
-              onClick={() => setSelectedTool(tool)}
-              className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
-            >
-              {tool.name}
-            </button>
+          {groupedTools.map(group => (
+            <div key={group.category} className="mb-6">
+              <h3 className="text-md font-semibold text-gray-300 mb-2">{group.category}</h3>
+              {group.tools.map(tool => (
+                <button
+                  key={tool.name}
+                  onClick={() => setSelectedTool(tool)}
+                  className={`w-full text-left px-3 py-2 rounded hover:bg-gray-700 ${selectedTool.name === tool.name ? 'bg-gray-800 font-bold' : ''}`}
+                >
+                  {tool.name}
+                </button>
+              ))}
+            </div>
           ))}
         </aside>
 
-        {/* Selected Tool Display */}
         <main className="flex-1 p-6 overflow-y-auto">
           <h1 className="text-2xl font-bold text-blue-700 mb-4">{selectedTool.name}</h1>
           <div className="bg-white rounded shadow p-4">
