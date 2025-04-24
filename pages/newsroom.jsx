@@ -23,6 +23,7 @@ import InterviewScheduler from '@/components/InterviewScheduler'
 import SentimentScanner from '@/components/SentimentScanner'
 import FactUpdateTracker from '@/components/FactUpdateTracker'
 import OutreachAssistant from '@/components/OutreachAssistant'
+import TaskManager from '@/components/TaskManager'
 import { useState } from 'react'
 import Image from 'next/image'
 
