@@ -12,29 +12,26 @@ export default function Login() {
 
   // ✅ Check for session when component mounts (just once)
   useEffect(() => {
-    const getSession = async () => {
+    const checkSession = async () => {
       const {
-        data: { session },
+        data: { session }
       } = await supabase.auth.getSession()
-
+  
       if (session) {
-        router.replace('/dashboard')
+        router.replace('/newsroom')
       }
     }
-
-    getSession()
-
-    // ✅ Subscribe to auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+  
+    checkSession()
+  
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
-        router.replace('/dashboard')
+        router.replace('/newsroom')
       }
     })
-
-    return () => subscription.unsubscribe()
-  }, [])
+  
+    return () => authListener.subscription.unsubscribe()
+  }, [router])  
 
   const handleGoogleLogin = async () => {
     await supabase.auth.signInWithOAuth({

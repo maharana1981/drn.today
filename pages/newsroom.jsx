@@ -1,3 +1,7 @@
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/router'
+import { supabase } from '@/lib/supabase'
+
 import DashboardLayout from '@/components/layouts/DashboardLayout'
 import SmartComposer from '@/components/SmartComposer'
 import AIResearchAssistant from '@/components/AIResearchAssistant'
@@ -24,7 +28,6 @@ import SentimentScanner from '@/components/SentimentScanner'
 import FactUpdateTracker from '@/components/FactUpdateTracker'
 import OutreachAssistant from '@/components/OutreachAssistant'
 import TaskManager from '@/components/TaskManager'
-import { useState } from 'react'
 import Image from 'next/image'
 
 const groupedTools = [
@@ -83,6 +86,31 @@ const groupedTools = [
 export default function Newsroom() {
   const [selectedTool, setSelectedTool] = useState(groupedTools[0].tools[0])
   const [searchQuery, setSearchQuery] = useState('')
+  const [sessionChecked, setSessionChecked] = useState(false)
+  const [loggedIn, setLoggedIn] = useState(false)
+  const router = useRouter()
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        router.replace('/login')
+      } else {
+        setLoggedIn(true)
+      }
+      setSessionChecked(true)
+    }
+
+    checkSession()
+  }, [router])
+
+  if (!sessionChecked) {
+    return <div className="p-8 text-white text-center">Checking access...</div>
+  }
+
+  if (!loggedIn) {
+    return null
+  }
 
   const filteredTools = groupedTools.map(group => ({
     ...group,
