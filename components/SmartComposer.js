@@ -1,3 +1,38 @@
+const [mediaFiles, setMediaFiles] = useState([])
+const [mediaUrls, setMediaUrls] = useState([])
+const [uploading, setUploading] = useState(false)
+
+const handleMediaUpload = async (file) => {
+  if (!file) return
+  setUploading(true)
+
+  try {
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type
+      })
+    })
+
+    const { uploadUrl, fileUrl } = await res.json()
+
+    await fetch(uploadUrl, {
+      method: 'PUT',
+      headers: { 'Content-Type': file.type },
+      body: file
+    })
+
+    setMediaUrls(prev => [...prev, fileUrl])
+  } catch (error) {
+    alert('Upload failed')
+    console.error(error)
+  } finally {
+    setUploading(false)
+  }
+}
+
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -32,8 +67,13 @@ export default function SmartComposer() {
         .limit(5)
       setRecentPosts(data || [])
     }
+  
     fetchRecentPosts()
-  }, [])
+  
+    const disableRightClick = (e) => e.preventDefault()
+    document.addEventListener('contextmenu', disableRightClick)
+    return () => document.removeEventListener('contextmenu', disableRightClick)
+  }, [])  
 
   const handleSubmit = async () => {
     if (!title || !content) return alert('Title and content are required')
@@ -74,7 +114,7 @@ export default function SmartComposer() {
       category,
       location,
       scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-      media_url: mediaUrl,
+      media_urls: mediaUrls,
     })
 
     setLoading(false)
@@ -131,8 +171,89 @@ export default function SmartComposer() {
       <Label>Content</Label>
       <ReactQuill value={content} onChange={setContent} theme="snow" />
 
-      <Label>Upload Image/Video</Label>
-      <Input type="file" accept="image/*,video/*" onChange={(e) => setMediaFile(e.target.files[0])} />
+      <Label className="text-sm font-medium">Upload Images / Videos</Label>
+
+<Input
+  type="file"
+  accept="image/*,video/*"
+  multiple
+  onChange={(e) => {
+    const files = Array.from(e.target.files)
+    const validFiles = files.filter(file => {
+      const isValid = (file.size <= 10 * 1024 * 1024) &&
+                      (file.type.startsWith('image') || file.type.startsWith('video'))
+      if (!isValid) alert(`Skipping ${file.name}: Invalid type or too large`)
+      return isValid
+    })
+
+    setMediaFiles(prev => [...prev, ...validFiles])
+
+    validFiles.forEach(async (file) => {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
+      })
+
+      const { uploadUrl, fileUrl } = await res.json()
+
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      })
+
+      setMediaUrls(prev => [...prev, fileUrl])
+    })
+  }}
+/>
+{mediaUrls.length > 0 && (
+  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {mediaUrls.map((url, index) => {
+      const file = mediaFiles[index]
+      const type = file?.type || ''
+
+      return (
+        <div key={index} className="rounded border p-3 bg-gray-100">
+          {type.startsWith('image') ? (
+            <img
+              src={url}
+              alt="Uploaded"
+              className="w-full rounded shadow"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              style={{ userSelect: 'none' }}
+            />
+          ) : type.startsWith('video') ? (
+            <video
+              src={url}
+              controls
+              controlsList="nodownload noremoteplayback"
+              disablePictureInPicture
+              onContextMenu={(e) => e.preventDefault()}
+              className="w-full rounded shadow"
+              style={{ userSelect: 'none' }}
+            />
+          ) : null}
+
+          <Button
+            variant="destructive"
+            size="sm"
+            className="mt-2"
+            onClick={() => {
+              setMediaFiles(prev => prev.filter((_, i) => i !== index))
+              setMediaUrls(prev => prev.filter((_, i) => i !== index))
+            }}
+          >
+            ❌ Remove
+          </Button>
+        </div>
+      )
+    })}
+  </div>
+)}
+
+
 
       <Label>Schedule Post</Label>
       <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
