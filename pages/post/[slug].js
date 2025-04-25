@@ -1,3 +1,6 @@
+// This file is for post detail view. You mentioned Newsroom dashboard, so to implement the delete feature, this logic will be added in the Newsroom posts list or editor view.
+// For now, this file remains the post viewer. Let's add a helper function here if the user is authorized (optional):
+
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -14,6 +17,15 @@ export default function PostPage() {
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
+  const [userId, setUserId] = useState(null)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      setUserId(user?.id || null)
+    }
+    getUser()
+  }, [])
 
   useEffect(() => {
     if (slug) {
@@ -54,6 +66,23 @@ export default function PostPage() {
     }
   }, [slug])
 
+  const handleDeletePost = async () => {
+    if (!post || post.user_id !== userId) return alert('Unauthorized')
+    if (!confirm('⚠️ Are you sure you want to permanently delete this post and all related content?')) return
+
+    // Delete related comments first (optional)
+    await supabase.from('comments').delete().eq('post_id', post.id)
+
+    // Delete the post
+    const { error } = await supabase.from('posts').delete().eq('id', post.id)
+    if (!error) {
+      alert('✅ Post deleted successfully!')
+      router.push('/')
+    } else {
+      alert('❌ Failed to delete post.')
+    }
+  }
+
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
     if (!newComment.trim() || !post?.id) return
@@ -91,7 +120,12 @@ export default function PostPage() {
 
       <main className="max-w-3xl mx-auto p-6 text-white">
         <Link href="/" className="text-blue-400 hover:underline">← Back to Home</Link>
-        <h1 className="text-3xl font-bold mt-4 mb-2">{post.title}</h1>
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold mt-4 mb-2">{post.title}</h1>
+          {userId === post.user_id && (
+            <button onClick={handleDeletePost} className="text-red-500 hover:text-red-700 text-sm">🗑️ Delete Post</button>
+          )}
+        </div>
         <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
         <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
 
