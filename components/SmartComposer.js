@@ -105,16 +105,28 @@ export default function SmartComposer() {
     }
 
     const supabaseClient = createClientComponentClient()
-    const user = { id: 'dev-mode-user' }
 
-    const { error } = await supabase.from('posts').insert({
-      title,
-      content,
-      category,
-      location,
-      scheduled_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-      media_urls: mediaUrls,
-    })
+const {
+  data: { user },
+  error: userError,
+} = await supabaseClient.auth.getUser()
+
+if (userError) {
+  console.error('Failed to get user:', userError)
+  alert('You must be logged in to post.')
+  return
+}
+
+const { error } = await supabaseClient.from('posts').insert({
+  title,
+  content,
+  category,
+  location,
+  schedule_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+  media_urls: mediaUrls,
+  status: scheduledAt ? 'scheduled' : 'published',
+  user_id: user.id,
+})
 
     setLoading(false)
     if (!error) {
