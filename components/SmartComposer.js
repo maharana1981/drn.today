@@ -61,7 +61,7 @@ export default function SmartComposer() {
     const fetchRecentPosts = async () => {
       const { data } = await supabase
         .from('posts')
-        .select('id, title, category, created_at, scheduled_at')
+        .select('id, title, category, created_at, scheduled_at, media_urls, user_id')
         .order('created_at', { ascending: false })
         .limit(5)
       setRecentPosts(data || [])
@@ -78,26 +78,28 @@ export default function SmartComposer() {
     const confirmDelete = confirm('Are you sure you want to permanently delete this post and its media?')
     if (!confirmDelete) return
   
-    // 🧹 Delete media
+    // 1. Delete media
     if (Array.isArray(post.media_urls)) {
       for (const url of post.media_urls) {
         const filename = url.split('/').pop()
-        await supabase.storage.from('media').remove([`posts/${filename}`])
+        const { error } = await supabase.storage.from('media').remove([`posts/${filename}`])
+        if (error) console.error('Failed to delete media:', error.message)
       }
     }
   
-    // 🧹 Delete comments
-    await supabase.from('comments').delete().eq('post_id', post.id)
+    // 2. Delete comments
+    const { error: commentError } = await supabase.from('comments').delete().eq('post_id', post.id)
+    if (commentError) console.error('Failed to delete comments:', commentError.message)
   
-    // 🧹 Delete the post
-    const { error } = await supabase.from('posts').delete().eq('id', post.id)
-    if (!error) {
-      alert('✅ Post deleted!')
-      fetchRecentPosts() // refresh the list
+    // 3. Delete the post
+    const { error: postError } = await supabase.from('posts').delete().eq('id', post.id)
+    if (postError) {
+      console.error('Supabase post delete error:', postError.message)
+      alert('❌ Failed to delete post: ' + postError.message)
     } else {
-      alert('❌ Failed to delete post.')
-      console.error(error)
-    }
+      alert('✅ Post deleted!')
+      fetchRecentPosts()
+    }  
   }
   
   const handleSubmit = async () => {
