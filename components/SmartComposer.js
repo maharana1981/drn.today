@@ -61,57 +61,46 @@ export default function SmartComposer() {
 
 
   useEffect(() => {
-    const fetchRecentPosts = async () => {
-      const { data } = await supabase
-        .from('posts')
-        .select('id, title, category, created_at, scheduled_at, media_urls, user_id')
-        .order('created_at', { ascending: false })
-        .limit(5)
-      setRecentPosts(data || [])
-    }
-  
     fetchRecentPosts()
-  
     const disableRightClick = (e) => e.preventDefault()
     document.addEventListener('contextmenu', disableRightClick)
     return () => document.removeEventListener('contextmenu', disableRightClick)
-  }, [])  
+  }, [])
+
+  const fetchRecentPosts = async () => {
+    const { data } = await supabase
+      .from('posts')
+      .select('id, title, category, created_at, scheduled_at, media_urls, user_id')
+      .order('created_at', { ascending: false })
+      .limit(5)
+    setRecentPosts(data || [])
+  }
 
   const handleDeletePost = (post) => {
-    // 1. Temporarily remove from UI
     setRecentPosts(prev => prev.filter(p => p.id !== post.id))
     setDeletedPost(post)
-  
-    // 2. Start 8 second undo window
+
     const timer = setTimeout(async () => {
       try {
-        // 🧹 Delete media
         if (Array.isArray(post.media_urls)) {
           for (const url of post.media_urls) {
             const filename = url.split('/').pop()
             await supabase.storage.from('media').remove([`posts/${filename}`])
           }
         }
-  
-        // 🧹 Delete comments
+
         await supabase.from('comments').delete().eq('post_id', post.id)
-  
-        // 🧹 Delete post
         const { error } = await supabase.from('posts').delete().eq('id', post.id)
-        if (error) {
-          console.error('Failed to permanently delete post:', error.message)
-          alert('❌ Deletion failed.')
-        }
-  
+        if (error) alert('❌ Error deleting post')
+
         setDeletedPost(null)
         setUndoTimer(null)
-        fetchRecentPosts() // ✅ refresh list
+        fetchRecentPosts()
       } catch (err) {
-        console.error('❌ Delete error:', err)
+        console.error('Delete error:', err)
       }
     }, 8000)
-  
-    // 3. Save timer
+
     setUndoTimer(timer)
   }  
   
@@ -345,44 +334,46 @@ if (!error) {
           <ul className="space-y-2">
             {recentPosts.map(post => (
               <li key={post.id} className="border rounded p-3 bg-gray-50">
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="font-semibold text-gray-800">{post.title}</p>
-                  <p className="text-sm text-gray-500">{post.category} | {post.scheduled_at ? '⏰ Scheduled' : '✅ Published'}</p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="font-semibold text-gray-800">{post.title}</p>
+                    <p className="text-sm text-gray-500">{post.category} | {post.scheduled_at ? '⏰ Scheduled' : '✅ Published'}</p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDeletePost(post)}
+                  >
+                    🗑️ Delete
+                  </Button>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => handleDeletePost(post)}
-                >
-                  🗑️ Delete
-                </Button>
-              </div>
-            </li>            
+              </li>
             ))}
           </ul>
+
           {deletedPost && (
-  <div className="mt-4 bg-yellow-100 border border-yellow-400 p-3 rounded flex items-center justify-between">
-    <p className="text-sm text-yellow-800">
-      Post “{deletedPost.title}” deleted. <strong>Undo?</strong>
-    </p>
-    <Button
-      onClick={() => {
-        if (!deletedPost) return
-        clearTimeout(undoTimer)
-        setRecentPosts(prev => [deletedPost, ...prev])
-        setDeletedPost(null)
-        setUndoTimer(null)
-      }}
-      variant="outline"
-      className="ml-4 text-yellow-700 border-yellow-400"
-    >
-      🔄 Undo
-    </Button>
-  </div>
-)}
+            <div className="mt-4 bg-yellow-100 border border-yellow-400 p-3 rounded flex items-center justify-between">
+              <p className="text-sm text-yellow-800">
+                Post “{deletedPost.title}” deleted. <strong>Undo?</strong>
+              </p>
+              <Button
+                onClick={() => {
+                  if (!deletedPost) return
+                  clearTimeout(undoTimer)
+                  setRecentPosts(prev => [deletedPost, ...prev])
+                  setDeletedPost(null)
+                  setUndoTimer(null)
+                }}
+                variant="outline"
+                className="ml-4 text-yellow-700 border-yellow-400"
+              >
+                🔄 Undo
+              </Button>
+            </div>
+          )}
         </div>
       )}
     </div>
   )
 }
+
