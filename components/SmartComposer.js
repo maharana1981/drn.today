@@ -86,7 +86,7 @@ export default function SmartComposer() {
         return
       }
       if (mediaFile.size > 10 * 1024 * 1024) {
-        alert('Max file size is 10MB')
+        alert('Max file size is 30MB')
         setLoading(false)
         return
       }
@@ -117,8 +117,16 @@ if (userError) {
   return
 }
 
+// ✅ Generate slug from title
+const generateSlug = (text) =>
+  text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
+const slug = generateSlug(title) + '-' + Date.now()
+
+// ✅ Insert post with slug
 const { error } = await supabaseClient.from('posts').insert({
   title,
+  slug, // ✅ Add this line
   content,
   category,
   location,
@@ -127,26 +135,27 @@ const { error } = await supabaseClient.from('posts').insert({
   status: scheduledAt ? 'scheduled' : 'published',
   user_id: user.id,
 })
+
 if (error) {
   console.error('Supabase insert error:', error)
   alert('❌ Error submitting post!')
 }
 
-    setLoading(false)
-    if (!error) {
-      setTitle('')
-      setContent('')
-      setCategory('')
-      setLocation('')
-      setScheduledAt('')
-      setMediaFile(null)
-      setStatus(scheduledAt ? 'scheduled' : 'published')
-      alert('✅ Post submitted!')
-    } else {
-      setStatus('failed')
-      console.error('Supabase insert error:', error)
-      alert('❌ Error submitting post!')
-    }
+setLoading(false)
+if (!error) {
+  setTitle('')
+  setContent('')
+  setCategory('')
+  setLocation('')
+  setScheduledAt('')
+  setMediaFile(null)
+  setStatus(scheduledAt ? 'scheduled' : 'published')
+  alert('✅ Post submitted!')
+} else {
+  setStatus('failed')
+  console.error('Supabase insert error:', error)
+  alert('❌ Error submitting post!')
+}
   }
 
   const handleAISuggest = () => {
