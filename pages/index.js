@@ -57,11 +57,27 @@ export default function PublicHome() {
   
     // fetch all reactions for the current page of posts
     const postIds = postsData.map(p => p.id)
-    const { data: reactions } = await supabase
-      .from('reactions')
-      .select('post_id, type, count:count(*)')
-      .in('post_id', postIds)
-      .group('post_id, type')
+
+const { data: reactions, error } = await supabase
+  .from('reactions')
+  .select('post_id, type')
+  .in('post_id', postIds)
+
+if (error) {
+  console.error('❌ Error fetching reactions:', error)
+}
+
+const reactionMap = {}
+
+reactions?.forEach(({ post_id, type }) => {
+  if (!reactionMap[post_id]) {
+    reactionMap[post_id] = { like: 0, dislike: 0, save: 0 }
+  }
+  if (reactionMap[post_id][type] !== undefined) {
+    reactionMap[post_id][type] += 1
+  }
+})
+
   
     // combine reactions with posts
     const postsWithReactions = postsData.map(post => {
@@ -187,9 +203,31 @@ export default function PublicHome() {
           <span className="font-bold mr-4">🚨 Breaking:</span>
           {breakingNews.map((post) => (
             <span key={post.id} className="mx-4">
-              <Link href={`/post/${post.slug}`} className="hover:underline">
-                {post.title}
-              </Link>
+              <Link href={`/post/${post.slug}`} key={post.id} className="block bg-[#0f172a] text-white rounded-lg shadow-md hover:shadow-lg transition-all p-4 w-full sm:w-[320px]">
+  {/* Show media preview if available */}
+  {post.media_urls?.[0] && (
+    post.media_urls[0].endsWith('.mp4') ? (
+      <video
+        src={post.media_urls[0]}
+        controls
+        className="w-full h-48 object-cover rounded mb-3"
+      />
+    ) : (
+      <img
+        src={post.media_urls[0]}
+        alt="media"
+        className="w-full h-48 object-cover rounded mb-3"
+      />
+    )
+  )}
+
+  <h2 className="text-lg font-bold mb-1">{post.title}</h2>
+  <p className="text-sm text-gray-400 mb-1">{post.location} · {post.category}</p>
+  <p
+    className="text-sm text-gray-300"
+    dangerouslySetInnerHTML={{ __html: post.content.slice(0, 100) + '...' }}
+  />
+</Link>
             </span>
           ))}
         </div>

@@ -40,7 +40,6 @@ export default function PostPage() {
     }
     fetchComments()
 
-    // Realtime subscription
     const channel = supabase
       .channel('realtime-comments')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' }, (payload) => {
@@ -55,7 +54,6 @@ export default function PostPage() {
     }
   }, [slug])
 
-  // Handle submit
   const handleCommentSubmit = async (e) => {
     e.preventDefault()
     if (!newComment.trim() || !post?.id) return
@@ -79,16 +77,14 @@ export default function PostPage() {
       <Head>
         <title>{post?.title} | DRN.today</title>
         <meta name="description" content={post?.summary || ''} />
-
         <meta property="og:type" content="article" />
         <meta property="og:title" content={post?.title || ''} />
         <meta property="og:description" content={post?.summary || ''} />
-        <meta property="og:image" content={post?.thumbnail_url || post?.video_url || ''} />
-
+        <meta property="og:image" content={post?.media_urls?.[0] || ''} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post?.title || ''} />
         <meta name="twitter:description" content={post?.summary || ''} />
-        <meta name="twitter:image" content={post?.thumbnail_url || post?.video_url || ''} />
+        <meta name="twitter:image" content={post?.media_urls?.[0] || ''} />
       </Head>
 
       <main className="max-w-3xl mx-auto p-6 text-white">
@@ -97,15 +93,24 @@ export default function PostPage() {
         <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
         <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
 
-        <div className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap">
-          {post.content || post.summary}
-        </div>
-
-        {post.video_url && (
-          <div className="mt-6">
-            <video src={post.video_url} controls className="w-full rounded" />
+        {/* Media rendering */}
+        {post.media_urls?.length > 0 && (
+          <div className="mt-6 space-y-4">
+            {post.media_urls.map((url, i) =>
+              url.endsWith('.mp4') ? (
+                <video key={i} src={url} controls className="w-full rounded-lg shadow" />
+              ) : (
+                <img key={i} src={url} alt={`media-${i}`} className="w-full rounded-lg shadow" />
+              )
+            )}
           </div>
         )}
+
+        {/* Post content */}
+        <div
+          className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap"
+          dangerouslySetInnerHTML={{ __html: post.content }}
+        />
 
         {/* Comment input */}
         <section className="mt-10">
