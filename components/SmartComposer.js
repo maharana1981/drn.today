@@ -127,6 +127,10 @@ const { error } = await supabaseClient.from('posts').insert({
   status: scheduledAt ? 'scheduled' : 'published',
   user_id: user.id,
 })
+if (error) {
+  console.error('Supabase insert error:', error)
+  alert('❌ Error submitting post!')
+}
 
     setLoading(false)
     if (!error) {
