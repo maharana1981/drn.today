@@ -56,6 +56,9 @@ export default function SmartComposer() {
   const [status, setStatus] = useState(null)
   const [recentPosts, setRecentPosts] = useState([])
   const [loading, setLoading] = useState(false)
+  const [deletedPost, setDeletedPost] = useState(null)
+  const [undoTimer, setUndoTimer] = useState(null)
+
 
   useEffect(() => {
     const fetchRecentPosts = async () => {
@@ -75,31 +78,34 @@ export default function SmartComposer() {
   }, [])  
 
   const handleDeletePost = async (post) => {
-    const confirmDelete = confirm('Are you sure you want to permanently delete this post and its media?')
-    if (!confirmDelete) return
+    setDeletedPost(post)
+    setRecentPosts(prev => prev.filter(p => p.id !== post.id))
   
-    // 1. Delete media
-    if (Array.isArray(post.media_urls)) {
-      for (const url of post.media_urls) {
-        const filename = url.split('/').pop()
-        const { error } = await supabase.storage.from('media').remove([`posts/${filename}`])
-        if (error) console.error('Failed to delete media:', error.message)
+    const timer = setTimeout(async () => {
+      // Delete media
+      if (Array.isArray(post.media_urls)) {
+        for (const url of post.media_urls) {
+          const filename = url.split('/').pop()
+          await supabase.storage.from('media').remove([`posts/${filename}`])
+        }
       }
-    }
   
-    // 2. Delete comments
-    const { error: commentError } = await supabase.from('comments').delete().eq('post_id', post.id)
-    if (commentError) console.error('Failed to delete comments:', commentError.message)
+      // Delete comments
+      await supabase.from('comments').delete().eq('post_id', post.id)
   
-    // 3. Delete the post
-    const { error: postError } = await supabase.from('posts').delete().eq('id', post.id)
-    if (postError) {
-      console.error('Supabase post delete error:', postError.message)
-      alert('❌ Failed to delete post: ' + postError.message)
-    } else {
-      alert('✅ Post deleted!')
+      // Delete post
+      const { error } = await supabase.from('posts').delete().eq('id', post.id)
+      if (error) {
+        console.error('Failed to permanently delete post:', error.message)
+        alert('❌ Deletion failed.')
+      }
+  
+      setDeletedPost(null)
+      setUndoTimer(null)
       fetchRecentPosts()
-    }  
+    }, 8000) // ⏱️ 8 seconds to undo
+  
+    setUndoTimer(timer)   
   }
   
   const handleSubmit = async () => {
