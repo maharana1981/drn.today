@@ -361,6 +361,7 @@ if (!error) {
     </p>
     <Button
       onClick={() => {
+        if (!deletedPost) return
         clearTimeout(undoTimer)
         setRecentPosts(prev => [deletedPost, ...prev])
         setDeletedPost(null)
