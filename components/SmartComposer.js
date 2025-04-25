@@ -311,8 +311,6 @@ if (!error) {
   </div>
 )}
 
-
-
       <Label>Schedule Post</Label>
       <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
 
@@ -356,6 +354,25 @@ if (!error) {
             </li>            
             ))}
           </ul>
+          {deletedPost && (
+  <div className="mt-4 bg-yellow-100 border border-yellow-400 p-3 rounded flex items-center justify-between">
+    <p className="text-sm text-yellow-800">
+      Post “{deletedPost.title}” deleted. <strong>Undo?</strong>
+    </p>
+    <Button
+      onClick={() => {
+        clearTimeout(undoTimer)
+        setRecentPosts(prev => [deletedPost, ...prev])
+        setDeletedPost(null)
+        setUndoTimer(null)
+      }}
+      variant="outline"
+      className="ml-4 text-yellow-700 border-yellow-400"
+    >
+      🔄 Undo
+    </Button>
+  </div>
+)}
         </div>
       )}
     </div>
