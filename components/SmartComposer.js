@@ -59,8 +59,7 @@ export default function SmartComposer() {
   const [deletedPost, setDeletedPost] = useState(null)
   const [undoTimer, setUndoTimer] = useState(null)
   const [undoTriggered, setUndoTriggered] = useState(false)
-
-
+  const [recentlyDeleted, setRecentlyDeleted] = useState(null)
 
   useEffect(() => {
     fetchRecentPosts()
@@ -78,32 +77,16 @@ export default function SmartComposer() {
     setRecentPosts(data || [])
   }
 
-  const handleDeletePost = (post) => {
-    setRecentPosts(prev => prev.filter(p => p.id !== post.id))
-    setDeletedPost(post)
-
+  const handleDeletePost = async (postId) => {
+    const deletedPost = posts.find(p => p.id === postId)
+    setPosts(prev => prev.filter(p => p.id !== postId))
+    setRecentlyDeleted(deletedPost)
+  
     const timer = setTimeout(async () => {
-      if (undoTriggered) return
-      try {
-        if (Array.isArray(post.media_urls)) {
-          for (const url of post.media_urls) {
-            const filename = url.split('/').pop()
-            await supabase.storage.from('media').remove([`posts/${filename}`])
-          }
-        }
-
-        await supabase.from('comments').delete().eq('post_id', post.id)
-        const { error } = await supabase.from('posts').delete().eq('id', post.id)
-        if (error) alert('❌ Error deleting post')
-
-        setDeletedPost(null)
-        setUndoTimer(null)
-        fetchRecentPosts()
-      } catch (err) {
-        console.error('Delete error:', err)
-      }
-    }, 8000)
-
+      await supabase.from('posts').update({ is_deleted: true }).eq('id', postId)
+      setRecentlyDeleted(null)
+    }, 5000)
+  
     setUndoTimer(timer)
   }  
   
@@ -355,7 +338,7 @@ if (!error) {
           </ul>
 
           {deletedPost && (
-            <div className="mt-4 bg-yellow-100 border border-yellow-400 p-3 rounded flex items-center justify-between">
+            <div className="fixed bottom-4 right-4 bg-yellow-100 border border-yellow-400 p-3 rounded shadow-lg z-50 flex items-center justify-between">
               <p className="text-sm text-yellow-800">
                 Post “{deletedPost.title}” deleted. <strong>Undo?</strong>
               </p>
