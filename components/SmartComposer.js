@@ -58,6 +58,8 @@ export default function SmartComposer() {
   const [loading, setLoading] = useState(false)
   const [deletedPost, setDeletedPost] = useState(null)
   const [undoTimer, setUndoTimer] = useState(null)
+  const [undoTriggered, setUndoTriggered] = useState(false)
+
 
 
   useEffect(() => {
@@ -81,6 +83,7 @@ export default function SmartComposer() {
     setDeletedPost(post)
 
     const timer = setTimeout(async () => {
+      if (undoTriggered) return
       try {
         if (Array.isArray(post.media_urls)) {
           for (const url of post.media_urls) {
@@ -362,6 +365,7 @@ if (!error) {
                   clearTimeout(undoTimer)
                   setRecentPosts(prev => [deletedPost, ...prev])
                   setDeletedPost(null)
+                  setUndoTriggered(true)
                   setUndoTimer(null)
                 }}
                 variant="outline"
