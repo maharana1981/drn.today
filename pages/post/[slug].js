@@ -69,7 +69,13 @@ export default function PostPage() {
   const handleDeletePost = async () => {
     if (!post || post.user_id !== userId) return alert('Unauthorized')
     if (!confirm('⚠️ Are you sure you want to permanently delete this post and all related content?')) return
-
+    if (post.media_urls && Array.isArray(post.media_urls)) {
+      for (const url of post.media_urls) {
+        const filePath = url.split('/').slice(-1)[0] // assumes public URL ends in filename
+        await supabase.storage.from('media').remove([`posts/${filePath}`])
+      }
+    }
+    
     // Delete related comments first (optional)
     await supabase.from('comments').delete().eq('post_id', post.id)
 

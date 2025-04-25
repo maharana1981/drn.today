@@ -74,6 +74,32 @@ export default function SmartComposer() {
     return () => document.removeEventListener('contextmenu', disableRightClick)
   }, [])  
 
+  const handleDeletePost = async (post) => {
+    const confirmDelete = confirm('Are you sure you want to permanently delete this post and its media?')
+    if (!confirmDelete) return
+  
+    // 🧹 Delete media
+    if (Array.isArray(post.media_urls)) {
+      for (const url of post.media_urls) {
+        const filename = url.split('/').pop()
+        await supabase.storage.from('media').remove([`posts/${filename}`])
+      }
+    }
+  
+    // 🧹 Delete comments
+    await supabase.from('comments').delete().eq('post_id', post.id)
+  
+    // 🧹 Delete the post
+    const { error } = await supabase.from('posts').delete().eq('id', post.id)
+    if (!error) {
+      alert('✅ Post deleted!')
+      fetchRecentPosts() // refresh the list
+    } else {
+      alert('❌ Failed to delete post.')
+      console.error(error)
+    }
+  }
+  
   const handleSubmit = async () => {
     if (!title || !content) return alert('Title and content are required')
     setLoading(true)
@@ -306,9 +332,20 @@ if (!error) {
           <ul className="space-y-2">
             {recentPosts.map(post => (
               <li key={post.id} className="border rounded p-3 bg-gray-50">
-                <p className="font-semibold text-gray-800">{post.title}</p>
-                <p className="text-sm text-gray-500">{post.category} | {post.scheduled_at ? '⏰ Scheduled' : '✅ Published'}</p>
-              </li>
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-semibold text-gray-800">{post.title}</p>
+                  <p className="text-sm text-gray-500">{post.category} | {post.scheduled_at ? '⏰ Scheduled' : '✅ Published'}</p>
+                </div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => handleDeletePost(post)}
+                >
+                  🗑️ Delete
+                </Button>
+              </div>
+            </li>            
             ))}
           </ul>
         </div>
