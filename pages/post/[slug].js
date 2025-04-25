@@ -1,4 +1,3 @@
-// pages/post/[slug].js
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
@@ -7,13 +6,15 @@ import Head from 'next/head'
 
 export default function PostPage() {
   const router = useRouter()
-  const { slug } = router.query
+  const slug = decodeURIComponent((router.query.slug || '').toString().toLowerCase())
+    .replace(/\s+/g, '-')
+    .replace(/[^a-z0-9\-]/g, '')
+
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState([])
   const [newComment, setNewComment] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Fetch post
   useEffect(() => {
     if (slug) {
       const fetchPost = async () => {
@@ -27,7 +28,6 @@ export default function PostPage() {
     }
   }, [slug])
 
-  // Fetch comments
   useEffect(() => {
     if (!slug) return
     const fetchComments = async () => {
@@ -72,6 +72,8 @@ export default function PostPage() {
 
   if (!post) return <div className="p-8 text-white text-center">Loading...</div>
 
+  const mediaUrls = Array.isArray(post.media_urls) ? post.media_urls : [post.media_urls].filter(Boolean)
+
   return (
     <>
       <Head>
@@ -80,11 +82,11 @@ export default function PostPage() {
         <meta property="og:type" content="article" />
         <meta property="og:title" content={post?.title || ''} />
         <meta property="og:description" content={post?.summary || ''} />
-        <meta property="og:image" content={post?.media_urls?.[0] || ''} />
+        <meta property="og:image" content={mediaUrls[0] || ''} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={post?.title || ''} />
         <meta name="twitter:description" content={post?.summary || ''} />
-        <meta name="twitter:image" content={post?.media_urls?.[0] || ''} />
+        <meta name="twitter:image" content={mediaUrls[0] || ''} />
       </Head>
 
       <main className="max-w-3xl mx-auto p-6 text-white">
@@ -93,10 +95,9 @@ export default function PostPage() {
         <p className="text-gray-400 text-sm">{post.location} · {post.category} · {new Date(post.created_at).toLocaleDateString()}</p>
         <p className="text-sm text-gray-500 mt-1">👁️ {post.views || 0} views</p>
 
-        {/* Media rendering */}
-        {post.media_urls?.length > 0 && (
+        {mediaUrls.length > 0 && (
           <div className="mt-6 space-y-4">
-            {post.media_urls.map((url, i) =>
+            {mediaUrls.map((url, i) =>
               url.endsWith('.mp4') ? (
                 <video key={i} src={url} controls className="w-full rounded-lg shadow" />
               ) : (
@@ -106,13 +107,11 @@ export default function PostPage() {
           </div>
         )}
 
-        {/* Post content */}
         <div
           className="mt-6 text-lg leading-relaxed text-gray-100 whitespace-pre-wrap"
-          dangerouslySetInnerHTML={{ __html: post.content }}
+          dangerouslySetInnerHTML={{ __html: post.content || '' }}
         />
 
-        {/* Comment input */}
         <section className="mt-10">
           <h2 className="text-xl font-bold mb-2">Leave a Comment</h2>
           <form onSubmit={handleCommentSubmit} className="mb-6">
@@ -132,7 +131,6 @@ export default function PostPage() {
             </button>
           </form>
 
-          {/* Comments list */}
           <div>
             <h3 className="text-lg font-semibold mb-3">Comments</h3>
             {comments.length === 0 && <p className="text-gray-400">No comments yet.</p>}
