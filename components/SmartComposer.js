@@ -1,34 +1,4 @@
-const handleMediaUpload = async (file) => {
-  if (!file) return
-  setUploading(true)
-
-  try {
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        fileName: file.name,
-        fileType: file.type
-      })
-    })
-
-    const { uploadUrl, fileUrl } = await res.json()
-
-    await fetch(uploadUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': file.type },
-      body: file
-    })
-
-    setMediaUrls(prev => [...prev, fileUrl])
-  } catch (error) {
-    alert('Upload failed')
-    console.error(error)
-  } finally {
-    setUploading(false)
-  }
-}
-
+// ⬇️ Your existing imports (unchanged)
 import { useState, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -38,10 +8,10 @@ import { Badge } from '@/components/ui/badge'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import dynamic from 'next/dynamic'
 import { format } from 'date-fns'
-
 const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 import 'react-quill/dist/quill.snow.css'
 
+// ⬇️ Start of component
 export default function SmartComposer() {
   const [mediaFiles, setMediaFiles] = useState([])
   const [mediaUrls, setMediaUrls] = useState([])
@@ -50,17 +20,47 @@ export default function SmartComposer() {
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
   const [content, setContent] = useState('')
-  const [mediaFile, setMediaFile] = useState(null)
   const [scheduledAt, setScheduledAt] = useState('')
   const [preview, setPreview] = useState(false)
   const [status, setStatus] = useState(null)
   const [recentPosts, setRecentPosts] = useState([])
   const [loading, setLoading] = useState(false)
-  const [deletedPost, setDeletedPost] = useState(null)
-  const [undoTimer, setUndoTimer] = useState(null)
-  const [undoTriggered, setUndoTriggered] = useState(false)
   const [recentlyDeleted, setRecentlyDeleted] = useState(null)
+  const [undoTimer, setUndoTimer] = useState(null)
 
+  // ⬇️ Media upload handler (fixed size and types)
+  const handleMediaUpload = async (file) => {
+    if (!file) return
+    setUploading(true)
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: file.name,
+          fileType: file.type
+        })
+      })
+
+      const { uploadUrl, fileUrl } = await res.json()
+
+      await fetch(uploadUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': file.type },
+        body: file
+      })
+
+      setMediaUrls(prev => [...prev, fileUrl])
+    } catch (error) {
+      alert('Upload failed')
+      console.error(error)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  // ⬇️ Fetch recent posts
   useEffect(() => {
     fetchRecentPosts()
     const disableRightClick = (e) => e.preventDefault()
@@ -77,107 +77,73 @@ export default function SmartComposer() {
     setRecentPosts(data || [])
   }
 
+  // ⬇️ Soft delete post (fixed posts/recentPosts mistake)
   const handleDeletePost = async (postId) => {
-    const deletedPost = posts.find(p => p.id === postId)
-    setPosts(prev => prev.filter(p => p.id !== postId))
+    const deletedPost = recentPosts.find(p => p.id === postId)
     setRecentlyDeleted(deletedPost)
-  
+    setRecentPosts(prev => prev.filter(p => p.id !== postId))
+
     const timer = setTimeout(async () => {
       await supabase.from('posts').update({ is_deleted: true }).eq('id', postId)
       setRecentlyDeleted(null)
     }, 5000)
-  
+
     setUndoTimer(timer)
-  }  
-  
+  }
+
+  // ⬇️ Submit post
   const handleSubmit = async () => {
     if (!title || !content) return alert('Title and content are required')
     setLoading(true)
 
-    let mediaUrl = null
-    if (mediaFile) {
-      if (!['image/', 'video/'].some(type => mediaFile.type.startsWith(type))) {
-        alert('Only image or video files are allowed')
-        setLoading(false)
-        return
-      }
-      if (mediaFile.size > 10 * 1024 * 1024) {
-        alert('Max file size is 30MB')
-        setLoading(false)
-        return
-      }
-
-      const fileExt = mediaFile.name.split('.').pop()
-      const filePath = `posts/${Date.now()}.${fileExt}`
-      const { error: uploadError } = await supabase.storage.from('media').upload(filePath, mediaFile)
-      if (uploadError) {
-        setStatus('failed')
-        alert('Media upload failed')
-        setLoading(false)
-        return
-      }
-      const { data: publicUrlData } = supabase.storage.from('media').getPublicUrl(filePath)
-      mediaUrl = publicUrlData?.publicUrl
+    const supabaseClient = createClientComponentClient()
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser()
+    if (userError) {
+      alert('You must be logged in to post.')
+      setLoading(false)
+      return
     }
 
-    const supabaseClient = createClientComponentClient()
+    const generateSlug = (text) =>
+      text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
-const {
-  data: { user },
-  error: userError,
-} = await supabaseClient.auth.getUser()
+    const slug = generateSlug(title) + '-' + Date.now()
 
-if (userError) {
-  console.error('Failed to get user:', userError)
-  alert('You must be logged in to post.')
-  return
-}
+    const { error } = await supabaseClient.from('posts').insert({
+      title,
+      slug,
+      content,
+      category,
+      location,
+      schedule_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
+      media_urls: mediaUrls,
+      status: scheduledAt ? 'scheduled' : 'published',
+      user_id: user.id,
+    })
 
-// ✅ Generate slug from title
-const generateSlug = (text) =>
-  text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
-
-const slug = generateSlug(title) + '-' + Date.now()
-
-// ✅ Insert post with slug
-const { error } = await supabaseClient.from('posts').insert({
-  title,
-  slug, // ✅ Add this line
-  content,
-  category,
-  location,
-  schedule_at: scheduledAt ? new Date(scheduledAt).toISOString() : null,
-  media_urls: mediaUrls,
-  status: scheduledAt ? 'scheduled' : 'published',
-  user_id: user.id,
-})
-
-if (error) {
-  console.error('Supabase insert error:', error)
-  alert('❌ Error submitting post!')
-}
-
-setLoading(false)
-if (!error) {
-  setTitle('')
-  setContent('')
-  setCategory('')
-  setLocation('')
-  setScheduledAt('')
-  setMediaFile(null)
-  setStatus(scheduledAt ? 'scheduled' : 'published')
-  alert('✅ Post submitted!')
-} else {
-  setStatus('failed')
-  console.error('Supabase insert error:', error)
-  alert('❌ Error submitting post!')
-}
+    setLoading(false)
+    if (error) {
+      console.error('Supabase insert error:', error)
+      setStatus('failed')
+      alert('❌ Error submitting post!')
+    } else {
+      setTitle('')
+      setContent('')
+      setCategory('')
+      setLocation('')
+      setScheduledAt('')
+      setMediaFiles([])
+      setMediaUrls([])
+      setStatus(scheduledAt ? 'scheduled' : 'published')
+      alert('✅ Post submitted successfully!')
+    }
   }
 
   const handleAISuggest = () => {
     setTitle('🧠 AI Suggested Headline: Breaking Innovation in AI')
   }
 
+  // ⬇️ The actual return JSX (fixed delete button, undo, upload)
   return (
     <div className="bg-white p-4 rounded-xl shadow space-y-4 mb-6">
       <h2 className="text-xl font-bold">📝 Smart Post Composer</h2>
@@ -212,86 +178,50 @@ if (!error) {
       <ReactQuill value={content} onChange={setContent} theme="snow" />
 
       <Label className="text-sm font-medium">Upload Images / Videos</Label>
+      <Input
+        type="file"
+        accept="image/*,video/*"
+        multiple
+        onChange={async (e) => {
+          const files = Array.from(e.target.files)
 
-<Input
-  type="file"
-  accept="image/*,video/*"
-  multiple
-  onChange={(e) => {
-    const files = Array.from(e.target.files)
-    const validFiles = files.filter(file => {
-      const isValid = (file.size <= 10 * 1024 * 1024) &&
-                      (file.type.startsWith('image') || file.type.startsWith('video'))
-      if (!isValid) alert(`Skipping ${file.name}: Invalid type or too large`)
-      return isValid
-    })
+          for (const file of files) {
+            if (!['image/', 'video/'].some(type => file.type.startsWith(type))) {
+              alert(`Skipping ${file.name}: Invalid file type.`)
+              continue
+            }
+            if (file.size > 30 * 1024 * 1024) {
+              alert(`Skipping ${file.name}: File too large.`)
+              continue
+            }
+            await handleMediaUpload(file)
+          }
+        }}
+      />
 
-    setMediaFiles(prev => [...prev, ...validFiles])
-
-    validFiles.forEach(async (file) => {
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileName: file.name, fileType: file.type }),
-      })
-
-      const { uploadUrl, fileUrl } = await res.json()
-
-      await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': file.type },
-        body: file
-      })
-
-      setMediaUrls(prev => [...prev, fileUrl])
-    })
-  }}
-/>
-{mediaUrls.length > 0 && (
-  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-    {mediaUrls.map((url, index) => {
-      const file = mediaFiles[index]
-      const type = file?.type || ''
-
-      return (
-        <div key={index} className="rounded border p-3 bg-gray-100">
-          {type.startsWith('image') ? (
-            <img
-              src={url}
-              alt="Uploaded"
-              className="w-full rounded shadow"
-              draggable={false}
-              onContextMenu={(e) => e.preventDefault()}
-              style={{ userSelect: 'none' }}
-            />
-          ) : type.startsWith('video') ? (
-            <video
-              src={url}
-              controls
-              controlsList="nodownload noremoteplayback"
-              disablePictureInPicture
-              onContextMenu={(e) => e.preventDefault()}
-              className="w-full rounded shadow"
-              style={{ userSelect: 'none' }}
-            />
-          ) : null}
-
-          <Button
-            variant="destructive"
-            size="sm"
-            className="mt-2"
-            onClick={() => {
-              setMediaFiles(prev => prev.filter((_, i) => i !== index))
-              setMediaUrls(prev => prev.filter((_, i) => i !== index))
-            }}
-          >
-            ❌ Remove
-          </Button>
+      {mediaUrls.length > 0 && (
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {mediaUrls.map((url, index) => (
+            <div key={index} className="rounded border p-3 bg-gray-100">
+              {url.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                <img src={url} alt="Uploaded" className="w-full rounded shadow" />
+              ) : (
+                <video src={url} controls className="w-full rounded shadow" />
+              )}
+              <Button
+                variant="destructive"
+                size="sm"
+                className="mt-2"
+                onClick={() => {
+                  setMediaUrls(prev => prev.filter((_, i) => i !== index))
+                }}
+              >
+                ❌ Remove
+              </Button>
+            </div>
+          ))}
         </div>
-      )
-    })}
-  </div>
-)}
+      )}
 
       <Label>Schedule Post</Label>
       <Input type="datetime-local" value={scheduledAt} onChange={(e) => setScheduledAt(e.target.value)} />
@@ -328,7 +258,7 @@ if (!error) {
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDeletePost(post)}
+                    onClick={() => handleDeletePost(post.id)}
                   >
                     🗑️ Delete
                   </Button>
@@ -337,18 +267,17 @@ if (!error) {
             ))}
           </ul>
 
-          {deletedPost && (
+          {recentlyDeleted && (
             <div className="fixed bottom-4 right-4 bg-yellow-100 border border-yellow-400 p-3 rounded shadow-lg z-50 flex items-center justify-between">
               <p className="text-sm text-yellow-800">
-                Post “{deletedPost.title}” deleted. <strong>Undo?</strong>
+                Post “{recentlyDeleted.title}” deleted. <strong>Undo?</strong>
               </p>
               <Button
                 onClick={() => {
-                  if (!deletedPost) return
+                  if (!recentlyDeleted) return
                   clearTimeout(undoTimer)
-                  setRecentPosts(prev => [deletedPost, ...prev])
-                  setDeletedPost(null)
-                  setUndoTriggered(true)
+                  setRecentPosts(prev => [recentlyDeleted, ...prev])
+                  setRecentlyDeleted(null)
                   setUndoTimer(null)
                 }}
                 variant="outline"
@@ -363,4 +292,3 @@ if (!error) {
     </div>
   )
 }
-
