@@ -77,36 +77,43 @@ export default function SmartComposer() {
     return () => document.removeEventListener('contextmenu', disableRightClick)
   }, [])  
 
-  const handleDeletePost = async (post) => {
-    setDeletedPost(post)
+  const handleDeletePost = (post) => {
+    // 1. Temporarily remove from UI
     setRecentPosts(prev => prev.filter(p => p.id !== post.id))
+    setDeletedPost(post)
   
+    // 2. Start 8 second undo window
     const timer = setTimeout(async () => {
-      // Delete media
-      if (Array.isArray(post.media_urls)) {
-        for (const url of post.media_urls) {
-          const filename = url.split('/').pop()
-          await supabase.storage.from('media').remove([`posts/${filename}`])
+      try {
+        // 🧹 Delete media
+        if (Array.isArray(post.media_urls)) {
+          for (const url of post.media_urls) {
+            const filename = url.split('/').pop()
+            await supabase.storage.from('media').remove([`posts/${filename}`])
+          }
         }
+  
+        // 🧹 Delete comments
+        await supabase.from('comments').delete().eq('post_id', post.id)
+  
+        // 🧹 Delete post
+        const { error } = await supabase.from('posts').delete().eq('id', post.id)
+        if (error) {
+          console.error('Failed to permanently delete post:', error.message)
+          alert('❌ Deletion failed.')
+        }
+  
+        setDeletedPost(null)
+        setUndoTimer(null)
+        fetchRecentPosts() // ✅ refresh list
+      } catch (err) {
+        console.error('❌ Delete error:', err)
       }
+    }, 8000)
   
-      // Delete comments
-      await supabase.from('comments').delete().eq('post_id', post.id)
-  
-      // Delete post
-      const { error } = await supabase.from('posts').delete().eq('id', post.id)
-      if (error) {
-        console.error('Failed to permanently delete post:', error.message)
-        alert('❌ Deletion failed.')
-      }
-  
-      setDeletedPost(null)
-      setUndoTimer(null)
-      fetchRecentPosts()
-    }, 8000) // ⏱️ 8 seconds to undo
-  
-    setUndoTimer(timer)   
-  }
+    // 3. Save timer
+    setUndoTimer(timer)
+  }  
   
   const handleSubmit = async () => {
     if (!title || !content) return alert('Title and content are required')
